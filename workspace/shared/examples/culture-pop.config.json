@@ -1,0 +1,87 @@
+{
+  "_example": "Known-good structure, ported from the hand-built Culture Pop demo (scroll_web_demos/drink brands/culture-pop). Quotes checked against drinkculturepop.com on 2026-10-14. Copy structure and tone, never facts.",
+  "version": 1,
+  "brand": "Culture Pop",
+  "wordmark": "CULTURE POP",
+  "logo": null,
+  "domain": "drinkculturepop.com",
+  "siteUrl": "https://drinkculturepop.com/",
+  "checkoutUrl": "https://drinkculturepop.com/collections/all",
+  "storeLocatorUrl": "https://drinkculturepop.com/pages/store-locator",
+  "igUrl": null,
+  "currency": "USD",
+  "category": "probiotic soda",
+  "theme": { "bg": "#fff4ef", "ink": "#1d1020", "accent": "#f93549", "accent2": "#173a64" },
+  "fonts": { "pair": "poster" },
+  "hero": {
+    "kicker": "Probiotic soda",
+    "headline": "Soda that’s actually alive.",
+    "sub": "Organic fruit juice, herbs and spices, and live probiotics in every can.",
+    "subIds": ["E1", "E2"],
+    "primaryCta": "Shop the flavors",
+    "secondaryCta": "Find a store"
+  },
+  "featuredIndex": 0,
+  "products": [
+    { "id": "watermelon-lime-rosemary", "name": "Watermelon Lime & Rosemary", "type": "Probiotic Soda", "size": "12 pack, 12 oz cans", "price": 29.99, "shape": "can", "color": "#ff4f6d", "deep": "#b8143a", "ink": "#ffffff", "label": null, "photo": null, "image": null, "url": "https://drinkculturepop.com/products/watermelon-lime-probiotic-soda", "notes": ["Summer in a can", "Live probiotics"], "noteIds": ["E10", "E2"], "tags": ["fresh"] },
+    { "id": "orange-mango", "name": "Orange Mango", "type": "Probiotic Soda", "size": "12 pack, 12 oz cans", "price": 29.99, "shape": "can", "color": "#ff9a1f", "deep": "#c85a00", "ink": "#2a1300", "label": null, "photo": null, "image": null, "url": "https://drinkculturepop.com/products/orange-mango-lime-probiotic-soda", "notes": ["Tropical with a subtle kick"], "noteIds": ["E11"], "tags": ["juicy"] },
+    { "id": "ginger-lemon", "name": "Ginger Lemon", "type": "Probiotic Soda", "size": "12 pack, 12 oz cans", "price": 29.99, "shape": "can", "color": "#f2c935", "deep": "#b98a00", "ink": "#2a1a00", "label": null, "photo": null, "image": null, "url": "https://drinkculturepop.com/products/ginger-lemon-turmeric", "notes": ["Bright and tart", "With turmeric"], "noteIds": ["E12", "E12"], "tags": ["zesty"] },
+    { "id": "pink-grapefruit", "name": "Pink Grapefruit", "type": "Probiotic Soda", "size": null, "price": null, "shape": "can", "color": "#ff8a7a", "deep": "#c94a46", "ink": "#2b0d0b", "label": null, "photo": null, "image": null, "url": null, "notes": ["Bubbly, bold, a little savory"], "noteIds": ["E13"], "tags": ["zesty"] },
+    { "id": "raspberry-lemonade", "name": "Raspberry Lemonade", "type": "Probiotic Soda", "size": "12 pack, 12 oz cans", "price": 29.99, "shape": "can", "color": "#d92e72", "deep": "#7c0f3d", "ink": "#ffffff", "label": null, "photo": null, "image": null, "url": "https://drinkculturepop.com/products/raspberry-lemonade", "notes": ["Jammy and zesty"], "noteIds": ["E14"], "tags": ["juicy"] }
+  ],
+  "filter": {
+    "label": "Flavor mood",
+    "options": [
+      { "id": "fresh", "label": "Fresh", "pick": "watermelon-lime-rosemary" },
+      { "id": "juicy", "label": "Juicy", "pick": "orange-mango" },
+      { "id": "zesty", "label": "Zesty", "pick": "ginger-lemon" }
+    ]
+  },
+  "claims": [
+    { "text": "Live probiotics", "claimId": "E2" },
+    { "text": "No refined sugar", "claimId": "E3" },
+    { "text": "No stevia", "claimId": "E3" },
+    { "text": "45 to 50 calories a can", "claimId": "E2" },
+    { "text": "Whole30 approved", "claimId": "E4" },
+    { "text": "Vegan and gluten free", "claimId": "E4" }
+  ],
+  "retailers": [
+    { "name": "drinkculturepop.com", "url": "https://drinkculturepop.com/collections/all", "claimId": null },
+    { "name": "Walmart", "url": null, "claimId": "E7" },
+    { "name": "Amazon", "url": null, "claimId": "E8" }
+  ],
+  "reviews": { "rating": null, "count": null, "quotes": [] },
+  "beats": [
+    { "id": "safe", "question": "Is it actually good for me?", "title": "Live probiotics. No refined sugar.", "body": "Organic fruit juice, herbs and spices, plus billions of live probiotics in every can. No refined sugar and no stevia.", "proof": "claims", "claimIds": ["E1", "E2", "E3"] },
+    { "id": "fit", "question": "Which flavor is mine?", "title": "Pick a mood. We’ll pick the can.", "body": "Tap a mood and the can above switches to match.", "proof": "filter", "claimIds": [] },
+    { "id": "price", "question": "Is it worth it over regular soda?", "title": "45 to 50 calories a can.", "body": "A 12 pack is $29.99. Subscribe and save 10% on every order.", "proof": "price", "claimIds": ["E2", "E9", "E6"] },
+    { "id": "where", "question": "Where can I grab one?", "title": "Online, or on a shelf near you.", "body": "Order a 12 pack online, or buy it on Walmart and Amazon.", "proof": "retailers", "claimIds": ["E7", "E8"] }
+  ],
+  "offer": {
+    "big": "STAY GUTSY",
+    "title": "Subscribe and save 10%",
+    "sub": "On every order. Free shipping when you spend $40 or subscribe.",
+    "cta": "Start a subscription",
+    "zipLabel": "Or find it near you",
+    "isDemo": false,
+    "claimId": "E6"
+  },
+  "shop": { "title": "Pick your pop", "sub": "Tap a can to see what’s inside. Add 3 to build a pack.", "bundleLabel": "pack", "bundleSize": 3, "bundleDiscount": 0.1 },
+  "evidence": [
+    { "id": "E1", "claim": "Probiotic soda made with organic fruit juices, spices and herbs", "quote": "Culture Pop is a probiotic soda made with organic fruit juices, spices & herbs.", "sourceUrl": "https://drinkculturepop.com/pages/faq-1" },
+    { "id": "E2", "claim": "45 to 50 calories and billions of live probiotics per can", "quote": "Each 12 oz can contains 45 - 50 calories and billions of CFUs of live probiotics at the time of canning.", "sourceUrl": "https://drinkculturepop.com/pages/faq-1" },
+    { "id": "E3", "claim": "No refined sugar, no stevia", "quote": "We don't use any artificial sweeteners, refined sugar, or other alternatives such as stevia.", "sourceUrl": "https://drinkculturepop.com/pages/faq-1" },
+    { "id": "E4", "claim": "Non-GMO, vegan, gluten free, kosher, Whole30 approved", "quote": "Culture Pop is non-GMO, vegan, gluten free, plant-based, certified kosher, and Whole30 approved.", "sourceUrl": "https://drinkculturepop.com/pages/faq-1" },
+    { "id": "E5", "claim": "Free shipping over $40 or with a subscription", "quote": "SPEND $40+ OR SUBSCRIBE FOR FREE SHIPPING", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E6", "claim": "Subscribe and save 10%", "quote": "Subscribe to your favorite Culture Pop flavors & save 10% on every order.", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E7", "claim": "Sold on Walmart", "quote": "Buy on walmart", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E8", "claim": "Sold on Amazon", "quote": "Buy on Amazon", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E9", "claim": "12 pack price", "quote": "Price: 29.99 USD", "sourceUrl": "https://drinkculturepop.com/products/watermelon-lime-probiotic-soda" },
+    { "id": "E10", "claim": "Watermelon tagline", "quote": "Watermelon Lime Rosemary summer in can, with a splash of complexity", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E11", "claim": "Orange Mango tagline", "quote": "Orange Mango Chili tropical, juicy goodness with a subtle kick", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E12", "claim": "Ginger Lemon tagline", "quote": "Ginger Lemon Turmeric bright & tart, a zesty refresh", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E13", "claim": "Pink Grapefruit tagline", "quote": "Grapefruit Ginger Juniper bubbly, bold & unexpectedly savory", "sourceUrl": "https://drinkculturepop.com/" },
+    { "id": "E14", "claim": "Raspberry tagline", "quote": "Raspberry Lemon Thyme jammy & zesty with a raspberry zing", "sourceUrl": "https://drinkculturepop.com/" }
+  ],
+  "credit": "Concept demo by tycodes.dev. Not affiliated with or endorsed by Culture Pop."
+}

@@ -1,0 +1,2 @@
+# Domains never to demo, one per line (registrable domain, e.g. example.com).
+# Lines starting with # are ignored. Add a "watch:" prefix to send runs to manual review instead of blocking.

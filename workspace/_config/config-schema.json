@@ -1,0 +1,592 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "properties": {
+  "version": {
+   "type": "number",
+   "const": 1
+  },
+  "brand": {
+   "type": "string"
+  },
+  "wordmark": {
+   "type": "string",
+   "description": "how the logo text reads, e.g. \"bubble\" or \"CULTURE POP\""
+  },
+  "logo": {
+   "description": "run path of the re-hosted logo image, or null",
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "domain": {
+   "type": "string"
+  },
+  "siteUrl": {
+   "type": "string"
+  },
+  "checkoutUrl": {
+   "type": "string",
+   "description": "brand site shop page; checkout always happens on the brand site"
+  },
+  "storeLocatorUrl": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "igUrl": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "currency": {
+   "type": "string"
+  },
+  "category": {
+   "type": "string"
+  },
+  "theme": {
+   "type": "object",
+   "properties": {
+    "bg": {
+     "type": "string",
+     "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "ink": {
+     "type": "string",
+     "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "accent": {
+     "type": "string",
+     "pattern": "^#[0-9a-fA-F]{6}$"
+    },
+    "accent2": {
+     "type": "string",
+     "pattern": "^#[0-9a-fA-F]{6}$"
+    }
+   },
+   "required": [
+    "bg",
+    "ink",
+    "accent",
+    "accent2"
+   ],
+   "additionalProperties": false
+  },
+  "fonts": {
+   "type": "object",
+   "properties": {
+    "pair": {
+     "type": "string",
+     "description": "id from font-pairs.md"
+    }
+   },
+   "required": [
+    "pair"
+   ],
+   "additionalProperties": false
+  },
+  "hero": {
+   "type": "object",
+   "properties": {
+    "kicker": {
+     "type": "string"
+    },
+    "headline": {
+     "type": "string"
+    },
+    "sub": {
+     "type": "string"
+    },
+    "subIds": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "evidence ids backing the sub line"
+    },
+    "primaryCta": {
+     "type": "string"
+    },
+    "secondaryCta": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "kicker",
+    "headline",
+    "sub",
+    "subIds",
+    "primaryCta",
+    "secondaryCta"
+   ],
+   "additionalProperties": false
+  },
+  "featuredIndex": {
+   "type": "integer",
+   "minimum": 0,
+   "maximum": 9007199254740991
+  },
+  "products": {
+   "minItems": 1,
+   "maxItems": 6,
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+     },
+     "name": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string",
+      "description": "what it is, in the brand words: \"Probiotic Soda\", \"Gel Cleanser\""
+     },
+     "size": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "price": {
+      "description": "regular price as shown on the site, null if not found",
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "shape": {
+      "type": "string",
+      "enum": [
+       "can",
+       "bottle",
+       "dropper",
+       "jar",
+       "tube",
+       "tub",
+       "photo"
+      ]
+     },
+     "color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+     },
+     "deep": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+     },
+     "ink": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+     },
+     "label": {
+      "description": "run path of uploaded label artwork, or null",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "photo": {
+      "description": "run path of a product photo when shape is photo, else null",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "image": {
+      "description": "run path of the scraped product image, for cards and the static fallback",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "url": {
+      "description": "product page on the brand site",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "notes": {
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "2 to 5 word facts for the detail panel"
+     },
+     "noteIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "evidence id for each note, same order"
+     },
+     "tags": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "filter option ids this product fits"
+     }
+    },
+    "required": [
+     "id",
+     "name",
+     "type",
+     "size",
+     "price",
+     "shape",
+     "color",
+     "deep",
+     "ink",
+     "label",
+     "photo",
+     "image",
+     "url",
+     "notes",
+     "noteIds",
+     "tags"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "filter": {
+   "anyOf": [
+    {
+     "type": "object",
+     "properties": {
+      "label": {
+       "type": "string",
+       "description": "\"Skin type\", \"Flavor mood\", \"Heat level\""
+      },
+      "options": {
+       "maxItems": 5,
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+         },
+         "label": {
+          "type": "string"
+         },
+         "pick": {
+          "type": "string",
+          "description": "product id"
+         }
+        },
+        "required": [
+         "id",
+         "label",
+         "pick"
+        ],
+        "additionalProperties": false
+       }
+      }
+     },
+     "required": [
+      "label",
+      "options"
+     ],
+     "additionalProperties": false
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "claims": {
+   "maxItems": 6,
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "text": {
+      "type": "string"
+     },
+     "claimId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "text",
+     "claimId"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "retailers": {
+   "maxItems": 8,
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "url": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "claimId": {
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    },
+    "required": [
+     "name",
+     "url",
+     "claimId"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "reviews": {
+   "type": "object",
+   "properties": {
+    "rating": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "count": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "quotes": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "properties": {
+       "text": {
+        "type": "string"
+       },
+       "author": {
+        "type": "string"
+       },
+       "sourceUrl": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "text",
+       "author",
+       "sourceUrl"
+      ],
+      "additionalProperties": false
+     }
+    }
+   },
+   "required": [
+    "rating",
+    "count",
+    "quotes"
+   ],
+   "additionalProperties": false
+  },
+  "beats": {
+   "minItems": 4,
+   "maxItems": 4,
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "enum": [
+       "safe",
+       "fit",
+       "price",
+       "where"
+      ]
+     },
+     "question": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "body": {
+      "type": "string"
+     },
+     "proof": {
+      "type": "string",
+      "enum": [
+       "claims",
+       "filter",
+       "price",
+       "retailers",
+       "products"
+      ]
+     },
+     "claimIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "id",
+     "question",
+     "title",
+     "body",
+     "proof",
+     "claimIds"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "offer": {
+   "type": "object",
+   "properties": {
+    "big": {
+     "type": "string",
+     "description": "2 or 3 words, uppercase"
+    },
+    "title": {
+     "type": "string"
+    },
+    "sub": {
+     "type": "string"
+    },
+    "cta": {
+     "type": "string"
+    },
+    "zipLabel": {
+     "type": "string"
+    },
+    "isDemo": {
+     "type": "boolean"
+    },
+    "claimId": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "big",
+    "title",
+    "sub",
+    "cta",
+    "zipLabel",
+    "isDemo",
+    "claimId"
+   ],
+   "additionalProperties": false
+  },
+  "shop": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string"
+    },
+    "sub": {
+     "type": "string"
+    },
+    "bundleLabel": {
+     "type": "string",
+     "description": "\"routine\", \"pack\", \"bundle\""
+    },
+    "bundleSize": {
+     "type": "integer",
+     "minimum": 2,
+     "maximum": 6
+    },
+    "bundleDiscount": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 0.5
+    }
+   },
+   "required": [
+    "title",
+    "sub",
+    "bundleLabel",
+    "bundleSize",
+    "bundleDiscount"
+   ],
+   "additionalProperties": false
+  },
+  "evidence": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "description": "E1, E2, ... as in brief.md"
+     },
+     "claim": {
+      "type": "string",
+      "description": "the fact in plain words"
+     },
+     "quote": {
+      "type": "string",
+      "description": "exact text copied from site.md, max 200 chars"
+     },
+     "sourceUrl": {
+      "type": "string",
+      "description": "page URL heading the quote in site.md, or owner:upload / owner:pasted"
+     }
+    },
+    "required": [
+     "id",
+     "claim",
+     "quote",
+     "sourceUrl"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "credit": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "version",
+  "brand",
+  "wordmark",
+  "logo",
+  "domain",
+  "siteUrl",
+  "checkoutUrl",
+  "storeLocatorUrl",
+  "igUrl",
+  "currency",
+  "category",
+  "theme",
+  "fonts",
+  "hero",
+  "featuredIndex",
+  "products",
+  "filter",
+  "claims",
+  "retailers",
+  "reviews",
+  "beats",
+  "offer",
+  "shop",
+  "evidence",
+  "credit"
+ ],
+ "additionalProperties": false
+}

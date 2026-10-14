@@ -1,0 +1,17 @@
+#!/bin/sh
+# Blocks commits that contain likely secrets or local secret files.
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+fail=0
+for f in $staged; do
+  case "$f" in
+    .dev.vars*|.env|.env.*) [ "$f" = ".env.example" ] || { echo "pre-commit: refusing to commit $f"; fail=1; } ;;
+    runs/*|demos/*|ledger/*|docs/icm-paper.pdf) echo "pre-commit: refusing to commit $f (local data)"; fail=1 ;;
+  esac
+done
+pattern='sk-ant-[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|xox[baprs]-[A-Za-z0-9-]{10,}|re_[A-Za-z0-9]{8,}_[A-Za-z0-9]{16,}'
+hits=$(git diff --cached -U0 -- . ':!.githooks/pre-commit' | grep '^+' | grep -E -n "$pattern")
+if [ -n "$hits" ]; then
+  echo "pre-commit: possible secret in staged changes:"; echo "$hits" | cut -c1-120; fail=1
+fi
+[ $fail -eq 0 ] || { echo "Commit blocked. If this is a false positive, fix the file or use --no-verify after checking."; exit 1; }

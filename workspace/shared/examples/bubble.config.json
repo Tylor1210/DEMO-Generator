@@ -1,0 +1,83 @@
+{
+  "_example": "UNVERIFIED structure example, ported from scroll_web_demos/cosmetics/bubble (v2, never reviewed on a device). hellobubble.com blocks our bot, so its evidence quotes were hand-entered and never machine-checked. Copy structure and tone only: skincare beats, a skin-type filter, a routine bundle, a tagged demo offer.",
+  "version": 1,
+  "brand": "Bubble",
+  "wordmark": "bubble",
+  "logo": null,
+  "domain": "hellobubble.com",
+  "siteUrl": "https://hellobubble.com/",
+  "checkoutUrl": "https://hellobubble.com/",
+  "storeLocatorUrl": null,
+  "igUrl": null,
+  "currency": "USD",
+  "category": "skincare",
+  "theme": { "bg": "#fff6ee", "ink": "#1b1640", "accent": "#ff5fa2", "accent2": "#5b6cff" },
+  "fonts": { "pair": "rounded" },
+  "hero": {
+    "kicker": "Dermatologist-developed skincare",
+    "headline": "Skincare that’s actually fun to use.",
+    "sub": "Gentle, fragrance-free formulas for every skin type.",
+    "subIds": ["E1", "E3"],
+    "primaryCta": "Build your routine",
+    "secondaryCta": "Find it in store"
+  },
+  "featuredIndex": 3,
+  "products": [
+    { "id": "fresh-start", "name": "Fresh Start", "type": "Gel Cleanser", "size": "125 mL", "price": null, "shape": "bottle", "color": "#7cc8ff", "deep": "#1f6fd1", "ink": "#0d1f4a", "label": null, "photo": null, "image": null, "url": null, "notes": ["Gel texture", "Everyday wash"], "noteIds": ["E5", "E5"], "tags": ["oily"] },
+    { "id": "cosmic-silk", "name": "Cosmic Silk", "type": "Milky Toner", "size": "100 mL", "price": null, "shape": "bottle", "color": "#cdb8ff", "deep": "#6d4fe0", "ink": "#22124f", "label": null, "photo": null, "image": null, "url": null, "notes": ["Hyaluronic acid"], "noteIds": ["E6"], "tags": ["sensitive"] },
+    { "id": "water-slide", "name": "Water Slide", "type": "Hydration Boosting Serum", "size": "30 mL", "price": null, "shape": "dropper", "color": "#6fe6d2", "deep": "#0f9a88", "ink": "#06332d", "label": null, "photo": null, "image": null, "url": null, "notes": ["Hyaluronic acid and peptides"], "noteIds": ["E7"], "tags": ["combo"] },
+    { "id": "slam-dunk", "name": "Slam Dunk", "type": "Hydrating Moisturizer", "size": "75 mL", "price": null, "shape": "jar", "color": "#ffb072", "deep": "#e0601a", "ink": "#3a1500", "label": null, "photo": null, "image": null, "url": null, "notes": ["Shea butter", "Avocado oil"], "noteIds": ["E8", "E8"], "tags": ["dry"] },
+    { "id": "solar-mate", "name": "Solar Mate", "type": "Mineral Sunscreen SPF 40", "size": "50 mL", "price": null, "shape": "tube", "color": "#ffe36e", "deep": "#d8a300", "ink": "#3a2c00", "label": null, "photo": null, "image": null, "url": null, "notes": ["Mineral SPF 40"], "noteIds": ["E9"], "tags": ["oily", "combo", "dry", "sensitive"] }
+  ],
+  "filter": {
+    "label": "Skin type",
+    "options": [
+      { "id": "dry", "label": "Dry", "pick": "slam-dunk" },
+      { "id": "oily", "label": "Oily", "pick": "fresh-start" },
+      { "id": "combo", "label": "Combo", "pick": "water-slide" },
+      { "id": "sensitive", "label": "Sensitive", "pick": "cosmic-silk" }
+    ]
+  },
+  "claims": [
+    { "text": "Built by dermatologists", "claimId": "E1" },
+    { "text": "Noncomedogenic", "claimId": "E2" },
+    { "text": "Fragrance-free", "claimId": "E3" },
+    { "text": "Vegan and cruelty-free", "claimId": "E4" }
+  ],
+  "retailers": [
+    { "name": "hellobubble.com", "url": "https://hellobubble.com/", "claimId": null },
+    { "name": "Target", "url": null, "claimId": "E10" },
+    { "name": "Ulta Beauty", "url": null, "claimId": "E10" },
+    { "name": "Walmart", "url": null, "claimId": "E10" }
+  ],
+  "reviews": { "rating": null, "count": null, "quotes": [] },
+  "beats": [
+    { "id": "safe", "question": "Will it break me out?", "title": "Gentle enough for sensitive skin.", "body": "Developed with dermatologists, noncomedogenic and fragrance-free.", "proof": "claims", "claimIds": ["E1", "E2", "E3"] },
+    { "id": "fit", "question": "Is it right for my skin?", "title": "Pick your skin type. We’ll pick the product.", "body": "Tap a skin type and the product above switches to the best match.", "proof": "filter", "claimIds": [] },
+    { "id": "price", "question": "Is it worth the price?", "title": "A full routine for less than one fancy serum.", "body": "Build a 3-step routine from the lineup.", "proof": "price", "claimIds": [] },
+    { "id": "where", "question": "Where do I get it?", "title": "On the shelf where you already shop.", "body": "Grab it online or in store at the retailers below.", "proof": "retailers", "claimIds": ["E10"] }
+  ],
+  "offer": {
+    "big": "FACE THE DAY",
+    "title": "Build a 3-step routine, save 15%",
+    "sub": "Pick a cleanser, a treatment and a moisturizer.",
+    "cta": "Start building",
+    "zipLabel": "Or find it near you",
+    "isDemo": true,
+    "claimId": null
+  },
+  "shop": { "title": "Shop the lineup", "sub": "Tap any product to see what’s inside. Add 3 to your routine box.", "bundleLabel": "routine", "bundleSize": 3, "bundleDiscount": 0.15 },
+  "evidence": [
+    { "id": "E1", "claim": "Developed with dermatologists", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E2", "claim": "Noncomedogenic", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E3", "claim": "Fragrance-free", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E4", "claim": "Vegan and cruelty-free", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E5", "claim": "Fresh Start is a gel cleanser", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E6", "claim": "Cosmic Silk has hyaluronic acid", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E7", "claim": "Water Slide has hyaluronic acid and peptides", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E8", "claim": "Slam Dunk has shea butter and avocado oil", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E9", "claim": "Solar Mate is mineral SPF 40", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" },
+    { "id": "E10", "claim": "Sold at Target, Ulta Beauty and Walmart", "quote": "UNVERIFIED hand entry", "sourceUrl": "https://hellobubble.com/" }
+  ],
+  "credit": "Concept demo by tycodes.dev. Not affiliated with or endorsed by Bubble."
+}

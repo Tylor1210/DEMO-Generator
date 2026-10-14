@@ -1,0 +1,27 @@
+{
+  "name": "tycodes-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Turns a business website into a shoppable 3D scroll demo. ICM pipeline, Cloudflare Workers.",
+  "scripts": {
+    "pipeline": "tsx cli/index.ts",
+    "schema": "tsx pipeline/write-schema.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.134.0",
+    "htmlparser2": "^12.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  }
+}
