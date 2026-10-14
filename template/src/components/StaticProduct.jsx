@@ -11,9 +11,9 @@ function useCutout(product) {
   const [src, setSrc] = useState(null)
   useEffect(() => {
     setSrc(null)
-    if (!product.image || product.shape === 'photo' || product.label) return
+    if (!(product.photo || product.image) || product.label) return
     let live = true
-    photoCutout(asset(product.image), specFor(product.shape), product.shape).then(u => { if (live) setSrc(u) })
+    photoCutout(asset(product.photo || product.image), specFor(product.shape), product.shape).then(u => { if (live) setSrc(u) })
     return () => { live = false }
   }, [product])
   return src

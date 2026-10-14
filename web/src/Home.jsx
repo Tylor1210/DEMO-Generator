@@ -3,6 +3,18 @@ import { Logo } from './site'
 
 const MAX_IMAGES = 4
 
+// A pinned preset to try before filling in the form (Culture Pop when it's there).
+function useExample() {
+  const [ex, setEx] = useState(null)
+  useEffect(() => {
+    fetch('/api/presets').then(r => (r.ok ? r.json() : [])).then(list => {
+      const pick = list.find(p => p.domain === 'drinkculturepop.com') ?? list[0]
+      if (pick) setEx({ slug: pick.slug, name: pick.domain === 'drinkculturepop.com' ? 'Culture Pop' : pick.domain })
+    }).catch(() => {})
+  }, [])
+  return ex
+}
+
 export default function Home({ go }) {
   const q = new URLSearchParams(location.search)
   const [url, setUrl] = useState(q.get('url') ?? '')
@@ -15,6 +27,7 @@ export default function Home({ go }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const moreRef = useRef()
+  const example = useExample()
 
   useEffect(() => { if (q.get('more') === '1') moreRef.current?.scrollIntoView({ block: 'center' }) }, [])
   useEffect(() => () => images.forEach(i => URL.revokeObjectURL(i.preview)), [images])
@@ -24,7 +37,7 @@ export default function Home({ go }) {
     for (const f of files) {
       if (next.length >= MAX_IMAGES) break
       if (!/^image\//.test(f.type)) continue
-      next.push({ file: f, kind: 'photo', preview: URL.createObjectURL(f) })
+      next.push({ file: f, kind: 'photo', product: '', preview: URL.createObjectURL(f) })
     }
     setImages(next)
   }
@@ -39,7 +52,7 @@ export default function Home({ go }) {
     fd.set('ownerClaim', owner ? 'true' : 'false')
     if (ig) fd.set('igUrl', ig)
     if (pasted) fd.set('pasted', pasted)
-    images.forEach(i => { fd.append('images', i.file); fd.append('kinds', i.kind) })
+    images.forEach(i => { fd.append('images', i.file); fd.append('kinds', i.kind); fd.append('products', i.product) })
     try {
       const res = await fetch('/api/runs', { method: 'POST', body: fd })
       const body = await res.json().catch(() => ({}))
@@ -60,6 +73,11 @@ export default function Home({ go }) {
           <p className="eyebrow">Shoppable 3D product demos</p>
           <h1>Your turn. Paste your website.</h1>
           <p className="lede">We read your site, write the copy from your own words, and build a scroll demo your customers can shop. It takes about a minute.</p>
+          {example && (
+            <a className="ghost example" href={`/d/${example.slug}`}>
+              See an example first: {example.name}
+            </a>
+          )}
         </section>
 
         <form className="card form" onSubmit={submit} noValidate>
@@ -72,13 +90,40 @@ export default function Home({ go }) {
             <input type="email" inputMode="email" autoComplete="email" placeholder="you@yourbrand.com" required value={email} onChange={e => setEmail(e.target.value)} />
             <small>So we can send you the demo link.</small>
           </label>
+          <div className="field">
+            <span>Product photos <em>(optional)</em></span>
+            <small>A clean shot of your product makes the 3D version look like the real thing. We’ll use it instead of guessing from your site.</small>
+            <label className="drop">
+              <input type="file" accept="image/png,image/jpeg,image/webp,image/avif" multiple onChange={e => { addFiles(e.target.files); e.target.value = '' }} disabled={images.length >= MAX_IMAGES} />
+              <span>{images.length >= MAX_IMAGES ? 'That’s the max' : images.length ? 'Add another photo' : 'Add a product photo'}</span>
+            </label>
+            {images.length > 0 && (
+              <ul className="thumbs">
+                {images.map((img, i) => (
+                  <li key={img.preview}>
+                    <img src={img.preview} alt="" />
+                    <input className="pname" type="text" placeholder="Which product is this?" value={img.product} aria-label={`Product name for image ${i + 1}`}
+                      onChange={e => setImages(images.map((x, j) => (j === i ? { ...x, product: e.target.value } : x)))} />
+                    <div className="seg" role="radiogroup" aria-label={`Image ${i + 1} type`}>
+                      {[['photo', 'Product photo'], ['label', 'Label artwork']].map(([k, l]) => (
+                        <button type="button" key={k} role="radio" aria-checked={img.kind === k} className={img.kind === k ? 'on' : ''}
+                          onClick={() => setImages(images.map((x, j) => (j === i ? { ...x, kind: k } : x)))}>{l}</button>
+                      ))}
+                    </div>
+                    <button type="button" className="remove" aria-label={`Remove image ${i + 1}`} onClick={() => setImages(images.filter((_, j) => j !== i))}>Remove</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <label className="check">
             <input type="checkbox" checked={owner} onChange={e => setOwner(e.target.checked)} />
             <span>I own or work for this business</span>
           </label>
 
           <button type="button" className="disclosure" aria-expanded={more} onClick={() => setMore(!more)}>
-            {more ? 'Hide extras' : 'Add product images or Instagram (optional)'}
+            {more ? 'Hide extras' : 'Add Instagram or product info (optional)'}
           </button>
 
           {more && (
@@ -88,30 +133,6 @@ export default function Home({ go }) {
                 <input type="url" inputMode="url" placeholder="instagram.com/yourbrand" value={ig} onChange={e => setIg(e.target.value)} />
                 <small>Saved as a link only. We don’t read Instagram.</small>
               </label>
-
-              <div className="field">
-                <span>Product images (up to 4)</span>
-                <label className="drop">
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/avif" multiple onChange={e => { addFiles(e.target.files); e.target.value = '' }} disabled={images.length >= MAX_IMAGES} />
-                  <span>{images.length >= MAX_IMAGES ? 'That’s the max' : 'Choose images'}</span>
-                </label>
-                {images.length > 0 && (
-                  <ul className="thumbs">
-                    {images.map((img, i) => (
-                      <li key={img.preview}>
-                        <img src={img.preview} alt="" />
-                        <div className="seg" role="radiogroup" aria-label={`Image ${i + 1} type`}>
-                          {[['photo', 'Product photo'], ['label', 'Label artwork']].map(([k, l]) => (
-                            <button type="button" key={k} role="radio" aria-checked={img.kind === k} className={img.kind === k ? 'on' : ''}
-                              onClick={() => setImages(images.map((x, j) => (j === i ? { ...x, kind: k } : x)))}>{l}</button>
-                          ))}
-                        </div>
-                        <button type="button" className="remove" aria-label={`Remove image ${i + 1}`} onClick={() => setImages(images.filter((_, j) => j !== i))}>Remove</button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
 
               <label className="field">
                 <span>Product info</span>

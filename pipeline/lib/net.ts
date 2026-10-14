@@ -80,6 +80,15 @@ export async function assertSafeUrl(raw: string | URL): Promise<URL> {
 
 // ---------- Fetch with caps ----------
 
+// Politeness: space requests to the same host. Storefronts (Shopify) throttle bursts from shared cloud IPs.
+const GAP_MS = 350
+const lastHit = new Map<string, number>()
+async function pace(host: string) {
+  const wait = (lastHit.get(host) ?? 0) + GAP_MS - Date.now()
+  lastHit.set(host, Date.now() + Math.max(0, wait))
+  if (wait > 0) await new Promise(r => setTimeout(r, wait))
+}
+
 export interface FetchResult {
   url: string
   status: number
@@ -98,17 +107,18 @@ export async function safeFetch(
   let url = (await assertSafeUrl(raw)).toString()
   let retried = false
   for (let hop = 0; hop < 6; hop++) {
+    await pace(new URL(url).hostname)
     const res = await fetch(url, {
       redirect: 'manual',
       headers: { 'user-agent': USER_AGENT, accept: opts.accept ?? 'text/html,application/xhtml+xml,*/*;q=0.8' },
       signal: AbortSignal.timeout(opts.timeoutMs ?? TIMEOUT_MS),
     })
-    // Rate limited (Shopify throttles bursts): wait as asked, up to 8 s, and try once more.
+    // Rate limited (Shopify throttles bursts): wait as asked (8 s if not said, 10 s at most) and try once more.
     if ((res.status === 429 || res.status === 503) && !retried) {
       retried = true
       await res.body?.cancel()
       const after = Number(res.headers.get('retry-after'))
-      await new Promise(r => setTimeout(r, Math.min(8000, Number.isFinite(after) && after > 0 ? after * 1000 : 3000)))
+      await new Promise(r => setTimeout(r, Math.min(10_000, Number.isFinite(after) && after > 0 ? after * 1000 : 8000)))
       hop--
       continue
     }

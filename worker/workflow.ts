@@ -37,7 +37,10 @@ export class DemoPipeline extends WorkflowEntrypoint<Env, Params> {
       for (let attempt = 0; ; attempt++) {
         try {
           result = await step.do(attempt ? `${stage} #${attempt + 1}` : stage,
-            { retries: { limit: 2, delay: '10 seconds', backoff: 'exponential' }, timeout: '10 minutes' },
+            // Collect waits out storefront rate limits: 30 s, 60 s, 120 s, 240 s. Other stages retry quickly.
+            stage === '02_collect'
+              ? { retries: { limit: 4, delay: '30 seconds', backoff: 'exponential' }, timeout: '10 minutes' }
+              : { retries: { limit: 2, delay: '10 seconds', backoff: 'exponential' }, timeout: '10 minutes' },
             async (): Promise<StepResult> => {
               await setRun({ stage })
               try { await runStage(d, runId, stage) } catch (e) {
@@ -57,14 +60,18 @@ export class DemoPipeline extends WorkflowEntrypoint<Env, Params> {
             })
         } catch (e) {
           // Retries exhausted: record a friendly failure. The build page offers uploads and a call.
+          const limited = /rate limited/.test(String((e as Error).message))
           await step.do(`fail ${stage}`, async () => {
             const m = (await readManifest(d.store, runId))!
-            m.status = 'failed'; m.message = `We hit a problem at "${stage}". ${String((e as Error).message).slice(0, 200)}`
+            m.status = limited ? 'blocked' : 'failed'
+            m.message = limited
+              ? 'Your site is busy right now and asked us to slow down. Try again in a few minutes, or paste your product info and add product photos and we’ll build from those.'
+              : `We hit a problem at "${stage}". ${String((e as Error).message).slice(0, 200)}`
             await writeManifest(d.store, m)
-            await setRun({ status: 'failed', message: m.message })
+            await setRun({ status: m.status, message: m.message })
             return true
           })
-          return { status: 'failed' }
+          return { status: limited ? 'blocked' : 'failed' }
         }
         if (result.capped) {
           await step.do(`queued ${stage} #${attempt + 1}`, async () => { await setRun({ status: 'queued', message: result.capped }); return true })

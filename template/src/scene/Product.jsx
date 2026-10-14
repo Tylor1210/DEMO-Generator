@@ -1,9 +1,12 @@
-import { forwardRef, useEffect, useMemo } from 'react'
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { asset } from '../brand'
 import { getShape } from './shapes'
 import { makeLabel, shade } from './makeLabel'
 import { photoLabel } from './photoLabel'
+import { photoCutoutSized } from '../photo'
+import { specFor } from '../shapeSpecs'
 
 // ?labels=generated turns photo labels off (handy for comparing).
 const photoLabelsOn = !/labels=generated/.test(location.search)
@@ -50,28 +53,59 @@ const Product = forwardRef(function Product({ product, ...props }, ref) {
 
   useEffect(() => () => Object.values(mats).forEach(m => { m.map?.dispose(); m.dispose() }), [mats])
 
-  // No uploaded label art: try wrapping the brand's own product photo around the pack.
+  // No uploaded label art: wrap the product's own photo around the pack. If the photo doesn't fit the
+  // shape's proportions (or the shape is "photo"), show the photo cut out as a floating billboard instead.
+  const [billboard, setBillboard] = useState(null)
   useEffect(() => {
-    if (product.label || !product.image || !shape.labelY || !photoLabelsOn) return
+    if (product.label || !product.image || !photoLabelsOn) return
     let live = true
-    photoLabel(asset(product.image), product.shape)
-      .then(tex => {
-        if (!tex) return
-        if (!live) { tex.dispose(); return }
-        const old = mats.label.map
-        mats.label.map = tex
-        mats.label.needsUpdate = true
-        old?.dispose()
+    const url = asset(product.image)
+    const wrap = shape.labelY && product.shape !== 'photo' ? photoLabel(url, product.shape) : Promise.resolve(null)
+    wrap
+      .then(async tex => {
+        if (tex) {
+          if (!live) { tex.dispose(); return }
+          const old = mats.label.map
+          mats.label.map = tex
+          mats.label.needsUpdate = true
+          old?.dispose()
+          return
+        }
+        const cut = await photoCutoutSized(url, specFor(product.shape), product.shape)
+        if (!cut || !live) return
+        const t = loadTexture(cut.src)
+        setBillboard({ map: t, aspect: cut.aspect })
       })
       .catch(() => { /* keep the generated label */ })
     return () => { live = false }
   }, [mats, product, shape])
+  useEffect(() => () => billboard?.map.dispose(), [billboard])
 
   return (
     <group ref={ref} {...props}>
-      {shape.parts.map((p, i) => <mesh key={i} geometry={p.geo} material={mats[p.mat]} />)}
+      {billboard
+        ? <Billboard map={billboard.map} aspect={billboard.aspect} height={shape.height} />
+        : shape.parts.map((p, i) => <mesh key={i} geometry={p.geo} material={mats[p.mat]} />)}
     </group>
   )
 })
+
+// A flat cut-out that mostly faces the viewer: it undoes most of the parent's spin, keeping a gentle sway.
+function Billboard({ map, aspect, height }) {
+  const ref = useRef()
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: 0.04, side: THREE.DoubleSide, toneMapped: false }), [map])
+  useEffect(() => () => mat.dispose(), [mat])
+  useFrame(() => {
+    const g = ref.current, parent = g?.parent
+    if (!parent) return
+    const turns = parent.rotation.y
+    g.rotation.y = -turns + Math.sin(turns) * 0.25
+  })
+  return (
+    <mesh ref={ref} material={mat}>
+      <planeGeometry args={[height * aspect, height]} />
+    </mesh>
+  )
+}
 
 export default Product

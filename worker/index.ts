@@ -76,7 +76,8 @@ async function demoPage(req: Request, env: Env, slug: string): Promise<Response>
   const shell = await env.ASSETS.fetch(new Request(new URL('/_demo/', req.url)))
   let html = await shell.text()
   const cfg = await liveDemoConfig(env, slug)
-  if (cfg) html = html.replace('<!--DEMO_CONFIG-->', `<script id="demo-config" type="application/json">${cfg.replace(/</g, '\\u003c')}</script>`)
+  const site = JSON.stringify({ bookingUrl: env.BOOKING_URL || '' }).replace(/</g, '\\u003c')
+  if (cfg) html = html.replace('<!--DEMO_CONFIG-->', `<script id="demo-config" type="application/json">${cfg.replace(/</g, '\\u003c')}</script><script id="site-config" type="application/json">${site}</script>`)
   return new Response(html, {
     status: cfg ? 200 : 404,
     headers: { 'content-type': 'text/html; charset=utf-8', 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'no-cache' },
@@ -109,9 +110,10 @@ async function createRunRoute(req: Request, env: Env): Promise<Response> {
   const id = `${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${slugify(host.replace(/^www\./, '').split('.')[0], 20)}-${randomId(4)}`
   const store = new R2Store(env.BUCKET)
 
-  const images: { file: string; kind: 'label' | 'photo' }[] = []
+  const images: { file: string; kind: 'label' | 'photo'; product?: string }[] = []
   const files = form.getAll('images').filter((f): f is File => typeof f !== 'string').slice(0, MAX_UPLOADS)
   const kinds = form.getAll('kinds').map(String)
+  const names = form.getAll('products').map(String)
   for (const [i, f] of files.entries()) {
     if (f.size > MAX_UPLOAD_BYTES) return err(`${f.name} is over 5 MB.`)
     const bytes = new Uint8Array(await f.arrayBuffer())
@@ -119,7 +121,7 @@ async function createRunRoute(req: Request, env: Env): Promise<Response> {
     if (!kind) return err(`${f.name} isn’t a PNG, JPG, WebP, GIF or AVIF image.`)
     const file = `upload-${i + 1}.${kind.ext}`
     await store.write(`runs/${id}/stages/01_intake/input/uploads/${file}`, bytes, kind.type)
-    images.push({ file, kind: kinds[i] === 'label' ? 'label' : 'photo' })
+    images.push({ file, kind: kinds[i] === 'label' ? 'label' : 'photo', product: names[i]?.trim().slice(0, 80) || undefined })
   }
 
   const payload = {

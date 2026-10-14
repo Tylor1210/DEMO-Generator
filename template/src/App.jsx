@@ -11,6 +11,7 @@ import { BuyBar, CartDrawer, DemoBar, Footer, Nav, Toast } from './components/Ch
 import { Beats, Hero, Offer } from './components/Sections'
 import { DetailPanel, Shop } from './components/Shop'
 import DebugPanel from './components/DebugPanel'
+import BookCall from './components/BookCall'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -154,6 +155,7 @@ export default function App() {
       <BuyBar />
       <CartDrawer />
       <Toast />
+      <BookCall />
       {debug && <DebugPanel mode={mode.use3D ? '3d' : `static (${mode.reason})`} />}
     </div>
   )

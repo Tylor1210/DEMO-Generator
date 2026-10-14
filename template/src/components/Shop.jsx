@@ -108,7 +108,7 @@ export function DetailPanel() {
           <button className="btn" onClick={() => actions.addToCart(i, 'detail')}>Add to cart</button>
           <button className="btn ghost" onClick={() => { actions.addToBox(i); actions.closeDetail() }}>+ {cap(bundleWord())}</button>
         </div>
-        {p.url && <a className="link-btn small" href={p.url} target="_blank" rel="noreferrer">See it on {brand.domain}</a>}
+        {p.url && <a className="link-btn small" href={p.url} target="_blank" rel="noreferrer">See the real product on {brand.domain}</a>}
         <div className="detail-nav">
           <button onClick={() => actions.openDetail((i - 1 + P.length) % P.length, 'detail_prev')}>← Prev</button>
           <button onClick={() => actions.openDetail((i + 1) % P.length, 'detail_next')}>Next →</button>

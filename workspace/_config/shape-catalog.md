@@ -15,7 +15,7 @@ The template draws packaging from parameters. There are no per-demo 3D models. P
 ## Rules
 - One shape per product. Products in one lineup can mix shapes.
 - An uploaded "label artwork" image is wrapped around the shape (`label`). It works best on can, bottle, jar and tub.
-- An uploaded "product photo" forces `photo` and sets `photo` to that image.
+- An uploaded "product photo" becomes that product's `image` and keeps its packaging shape. It beats any scraped image.
 - If the scraped product image clearly shows a bag, box or pouch, use `photo` with that image.
-- `image` should be that product's own front-on product shot from the site. The template unrolls it onto the 3D shape as the label and cuts it out for the static page, so the demo looks like the real packaging. Pick the matching product's image, never another product's.
+- `image` should be that product's own front-on product shot. The template unrolls it onto the 3D shape as the label, or shows it as a floating cut-out when it can't, and uses the cut-out on the static page. So the demo looks like the real packaging. Pick the matching product's image, never another product's.
 - Colors: `color` is the main package color, `deep` a darker shade for shading and gradients, `ink` the text color on the package (must read on `color`).

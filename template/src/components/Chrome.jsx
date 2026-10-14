@@ -1,6 +1,6 @@
 // Always-on UI: demo bar, nav, sticky buy bar, cart drawer, toast, footer.
 import { useEffect, useRef, useState } from 'react'
-import { asset, brand, bundleWord, money, slug } from '../brand'
+import { asset, brand, bundleWord, modelNote, money, slug } from '../brand'
 import { actions, totals, useStore } from '../store'
 import { track } from '../analytics'
 
@@ -166,6 +166,7 @@ export function Footer() {
     <footer className="footer">
       <p>{brand.credit}</p>
       <p className="muted small">Product facts come from {brand.domain}. Prices and availability may have changed.</p>
+      <p className="muted small">{modelNote()}</p>
       {reported ? <p className="small">Thanks. The demo is down until we review it.</p>
         : <button className="link-btn small" onClick={report}>Report this demo</button>}
     </footer>

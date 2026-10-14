@@ -23,11 +23,11 @@ const PAGE_HINTS: [RegExp, number][] = [
 ]
 const SKIP_LINK = /\/(account|cart|checkout|login|search|policies|blogs?|news|careers|wholesale|cdn|tools|contact|accessibility|privacy|terms|faire|ambassador|affiliate|data-sharing|opt-out|refund|shipping-policy)|\.(pdf|jpg|png|zip)$|#/
 
-interface Input { url: string; domain: string; images: { path: string; kind: string }[]; pasted: string | null; robotsBlocked: boolean }
+interface Input { url: string; domain: string; images: { path: string; kind: string; product?: string | null }[]; pasted: string | null; robotsBlocked: boolean }
 
 interface CondensedProduct {
   name: string; handle: string | null; url: string | null; type: string; price: string | null; compareAt: string | null
-  options: string[]; tags: string[]; image: string | null; imagePath?: string; description: string
+  options: string[]; tags: string[]; image: string | null; imagePath?: string; description: string; named?: boolean
 }
 
 const blockedMessage = (host: string, why: string) =>
@@ -37,7 +37,8 @@ const blockedMessage = (host: string, why: string) =>
 export async function run(ctx: StageCtx) {
   const input = (await ctx.inputJson<Input>('01_intake/output/input.json'))!
   const host = new URL(input.url).hostname
-  const hasOwnerInfo = !!input.pasted || input.images.length > 0
+  // Photos alone can't stand in for the site: the copy needs words to quote. Pasted info can.
+  const hasOwnerInfo = !!input.pasted
   const pages: PageData[] = []
   let blockedWhy = ''
 
@@ -46,7 +47,9 @@ export async function run(ctx: StageCtx) {
     try {
       const home = await safeFetch(input.url, { truncate: true })
       const html = dec.decode(home.body)
-      if (home.status === 401 || home.status === 403 || home.status === 429) blockedWhy = `the site answered ${home.status}`
+      // A rate limit is temporary: throw a plain error so the Workflow retries this stage later (no model cost).
+      if (home.status === 429 || home.status === 503) throw new Error(`rate limited: the site answered ${home.status}`)
+      if (home.status === 401 || home.status === 403) blockedWhy = `the site answered ${home.status}`
       else if (home.status >= 400) blockedWhy = `the site answered ${home.status}`
       else if (/cf-chl|captcha|just a moment\.\.\.|access denied/i.test(html) && html.length < 30_000) blockedWhy = 'it asked for a captcha'
       else pages.push(await extract(html, home.url))
@@ -70,6 +73,23 @@ export async function run(ctx: StageCtx) {
         if (Array.isArray(j.products)) { products = condenseShopify(j.products, origin); source = 'shopify' }
       }
     } catch { /* not Shopify, or blocked */ }
+  }
+
+  // Products the visitor named on their uploads: look each one up, so its real name, price and
+  // description are in the evidence even when it isn't in the first page of the catalog.
+  if (source === 'shopify') {
+    for (const name of [...new Set(input.images.map(i => i.product).filter((n): n is string => !!n))].slice(0, 4)) {
+      try {
+        const q = `${origin}/search/suggest.json?q=${encodeURIComponent(name)}&resources[type]=product&resources[limit]=1`
+        const r = await safeFetch(q, { accept: 'application/json' })
+        const handle = JSON.parse(dec.decode(r.body))?.resources?.results?.products?.[0]?.handle
+        if (!handle || products.some(p => p.handle === handle)) continue
+        const pr = await safeFetch(`${origin}/products/${handle}.json`, { accept: 'application/json' })
+        const found = condenseShopify([JSON.parse(dec.decode(pr.body)).product], origin)
+        products.unshift(...found.map(f => ({ ...f, named: true })))
+        ctx.log(`  found the named product "${name}": ${found[0]?.name}`)
+      } catch { ctx.log(`  couldn't look up "${name}"`) }
+    }
   }
 
   // Pick the most useful same-domain pages.
@@ -217,7 +237,7 @@ const normPath = (u: string) => u.replace(/\/$/, '').toLowerCase()
 
 function condenseShopify(list: any[], origin: string): CondensedProduct[] {
   return list
-    .filter(p => !/gift ?card/i.test(`${p.title} ${p.product_type}`))
+    .filter(p => !/gift ?card/i.test(`${p.title} ${p.product_type}`) && !/^\s*\[(gift|subscr|sample|free)/i.test(p.title ?? ''))
     .map(p => {
       const v = (p.variants ?? [])[0] ?? {}
       const opts = (p.variants ?? []).map((x: any) => x.title).filter((t: string) => t && t !== 'Default Title')
@@ -247,8 +267,8 @@ function coreProducts(products: CondensedProduct[]): CondensedProduct[] {
   const dom = dominantType(products)
   const merch = /shirt|tee|hoodie|hat|cap|sticker|tote|earring|mug|sock|pin|gift|merch|apparel|bottle opener/i
   const score = (p: CondensedProduct) =>
-    (dom && p.type === dom ? 4 : 0) + (merch.test(`${p.name} ${p.type}`) ? -6 : 0) +
-    (p.description ? 1 : 0) + (/variety|bundle|sampler|pack/i.test(p.name) ? -1 : 0)
+    (p.named ? 100 : 0) + (dom && p.type === dom ? 4 : 0) + (merch.test(`${p.name} ${p.type}`) ? -6 : 0) +
+    (p.description ? 1 : 0) + (/variety|bundle|sampler|pack|\bmini\b|\bset\b|\bduo\b|\bkit\b/i.test(p.name) ? -1 : 0)
   return [...products].sort((a, b) => score(b) - score(a)).slice(0, 12)
 }
 

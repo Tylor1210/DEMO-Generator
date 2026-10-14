@@ -1,6 +1,6 @@
 // Page sections, in scroll order: hero, objection beats, offer.
 import { useState } from 'react'
-import { brand, bundleWord, money } from '../brand'
+import { brand, bundleWord, modelNote, money } from '../brand'
 import { actions, useStore } from '../store'
 import { track } from '../analytics'
 import StaticProduct from './StaticProduct'
@@ -26,6 +26,7 @@ export function Hero({ goTo }) {
       </div>
       <div className="product-slot hero-slot">
         <StaticProduct product={brand.products[selected]} className="static-only" />
+        <p className="model-note front">{modelNote()}</p>
       </div>
     </section>
   )

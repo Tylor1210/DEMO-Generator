@@ -32,7 +32,7 @@
     "DAILY_RUN_CAP": "40",
     "REVIEW_MODE": "auto",
     "DEMO_TTL_DAYS": "30",
-    "BOOKING_URL": ""
+    "BOOKING_URL": "https://calendar.app.google/M7xBbkAZA7xnNN8Y8"
   },
 
   "workers_dev": true,

@@ -12,7 +12,7 @@ interface Payload {
   igUrl?: string
   email?: string
   ownerClaim?: boolean
-  images?: { file: string; kind: 'label' | 'photo' }[]
+  images?: { file: string; kind: 'label' | 'photo'; product?: string }[]
   pasted?: string
   force?: boolean
 }
@@ -69,7 +69,7 @@ export async function run(ctx: StageCtx) {
     if (prior) throw new StageBlocked(`A demo for ${domain} was built in the last ${DEDUPE_DAYS} days: ${prior.url}`, ['dedupe'])
   }
 
-  const images: { path: string; kind: 'label' | 'photo' }[] = []
+  const images: { path: string; kind: 'label' | 'photo'; product: string | null }[] = []
   for (const img of (p.images ?? []).slice(0, 4)) {
     const rel = `01_intake/input/uploads/${img.file.split('/').pop()}`
     const bytes = await ctx.input(rel)
@@ -78,7 +78,7 @@ export async function run(ctx: StageCtx) {
     if (!kind || bytes.byteLength > MAX_UPLOAD) { ctx.log(`  skipped ${rel}: not an image or over 5 MB`); continue }
     const out = `01_intake/output/uploads/${images.length + 1}-${img.kind}.${kind.ext}`
     await ctx.output(out, bytes, kind.type)
-    images.push({ path: out, kind: img.kind === 'label' ? 'label' : 'photo' })
+    images.push({ path: out, kind: img.kind === 'label' ? 'label' : 'photo', product: img.product?.trim().slice(0, 80) || null })
   }
 
   const input = {

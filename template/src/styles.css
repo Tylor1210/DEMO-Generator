@@ -286,11 +286,35 @@ html.has-3d .detail-static { display: none; }
 .sp-photo { justify-content: center; }
 .sp-photo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; border-radius: 18px; }
 
+/* Disclaimer under the hero product: small, readable, never covering the product */
+.hero-slot { position: relative; }
+.model-note {
+  position: absolute; left: 50%; bottom: 2vh; transform: translateX(-50%); width: min(340px, 90%);
+  font-size: 12px; line-height: 1.35; text-align: center; color: var(--muted);
+}
+
 /* ---------- Bundle lines in the cart ---------- */
 .bundle-line .dots { display: inline-flex; gap: 2px; }
 .bundle-price { display: flex; flex-direction: column; align-items: flex-end; font-weight: 700; }
 .bundle-price s { color: var(--muted); font-weight: 500; font-size: 13px; }
 .small-x { width: 44px; height: 44px; font-size: 20px; }
+
+/* ---------- Book a call ---------- */
+.bc-wrap { position: fixed; inset: 0; z-index: 12; display: grid; place-items: end center; padding: 16px; background: rgba(14, 15, 18, 0.45); }
+.bc { width: min(440px, 100%); background: #fff; color: var(--ink); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); display: grid; gap: 12px; }
+.bc h2 { font-size: 28px; }
+.bc p { color: var(--muted); line-height: 1.5; }
+.bc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.bc-pill {
+  position: fixed; z-index: 6; right: 16px; bottom: 96px; min-height: 48px; display: inline-flex; align-items: center;
+  padding: 0 18px; border-radius: 999px; background: var(--ink); color: #fff; font-weight: 700; font-size: 15px; text-decoration: none;
+  box-shadow: var(--shadow);
+}
+@media (min-width: 761px) { .bc-wrap { place-items: center; } .bc-pill { bottom: 24px; } }
+@media (prefers-reduced-motion: no-preference) {
+  .bc { animation: bc-in 0.35s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes bc-in { from { opacity: 0; transform: translateY(16px); } }
+}
 
 /* ---------- Footer ---------- */
 .footer { position: relative; z-index: 2; padding: 40px clamp(16px, 5vw, 72px) 120px; display: grid; gap: 6px; justify-items: start; font-size: 14px; }
@@ -323,6 +347,7 @@ html.has-3d .detail-static { display: none; }
   .hero-copy { gap: 12px; }
   .hero .claims { display: none; }
   .hero-slot { min-height: 40svh; }
+  .model-note { bottom: 0; font-size: 11px; }
   .hero-slot .sp { --h: 36svh; }
   .beat { grid-template-columns: 1fr; align-content: start; padding-top: calc(76px + var(--demobar-h)); gap: 0; }
   .beat.flip .beat-card { order: 0; }

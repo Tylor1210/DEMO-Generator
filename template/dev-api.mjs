@@ -28,7 +28,8 @@ export function inlineConfig(html, slug) {
   const cfg = readDemo(slug)
   if (!cfg) return html
   const json = JSON.stringify(cfg).replace(/</g, '\\u003c')
-  return html.replace('<!--DEMO_CONFIG-->', `<script id="demo-config" type="application/json">${json}</script>`)
+  const site = JSON.stringify({ bookingUrl: process.env.BOOKING_URL || '' })
+  return html.replace('<!--DEMO_CONFIG-->', `<script id="demo-config" type="application/json">${json}</script><script id="site-config" type="application/json">${site}</script>`)
 }
 
 export function slugFromPath(url) {

@@ -25,7 +25,7 @@ Turn the brief into a `brand.config.json` the template can render without code c
 3. Copy the brief's evidence list into `evidence` unchanged. Every `claimIds`, `noteIds`, `subIds` and retailer `claimId` must point at an id in that list.
 4. `claims`: up to 6 chips of 2 to 5 words, each with its evidence id.
 5. Beats: keep the brief's questions and answers. `proof` is `claims` for safe, `filter` for fit (or `products` if there is no filter), `price` for price, `retailers` for where.
-6. Uploads: an image with kind `label` sets that product's `label`. Kind `photo` sets `shape: "photo"` and `photo`. Use run paths exactly as given (`01_intake/output/uploads/...`, `02_collect/output/images/...`).
+6. Uploads beat scraped images. Match each upload to the product it names (`product` in input.json); with no name, it belongs to the flagship. Kind `label` sets that product's `label`. Kind `photo` sets that product's `image` and keeps its packaging shape (the template wraps the photo on the shape). Use `shape: "photo"` only when no packaging shape fits. Use run paths exactly as given (`01_intake/output/uploads/...`, `02_collect/output/images/...`).
 7. `offer`: real offers keep their evidence id and `isDemo: false`. Anything else is `isDemo: true`, `claimId: null`.
 8. `shop.bundleLabel` fits the category (routine for skincare, pack for drinks, bundle otherwise). `bundleDiscount` is 0.1 to 0.15 when the offer is a demo.
 9. `reviews` stays `{rating: null, count: null, quotes: []}` unless the intake supplied real ones.

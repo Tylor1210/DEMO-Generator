@@ -20,8 +20,9 @@ Read the brand's own site politely and keep everything as evidence. No model cal
 3. Probe Shopify's public `/products.json`. Keep a condensed product list.
 4. Write `site.md`: clean text grouped by page, each page's URL as a `##` heading. Lines repeated on every page (menus) appear once. Owner-pasted text goes under `## owner:pasted`. Keep it under about 18,000 characters so stage 03 stays in budget.
 5. Re-host up to 8 images (logo first, then product images) after checking type and size. Never hotlink.
-6. If the site blocks us (robots.txt, 401/403, captcha) and the owner gave no pasted info or uploads, stop and ask for them. Don't scrape anyway.
-7. If the homepage text is under about 500 characters, the site is JS-rendered. Flag `needsRender` (the Worker uses Browser Run).
+6. If the site blocks us (robots.txt, 401/403, captcha) and the owner pasted no product info, stop and ask for it (photos alone can't supply quotable facts). Don't scrape anyway.
+7. A rate limit (429/503) is temporary: fail the stage so it's retried later, with growing waits.
+8. If the homepage text is under about 500 characters, the site is JS-rendered. Flag `needsRender` (the Worker uses Browser Run).
 
 ## Outputs
 | Path | Why |

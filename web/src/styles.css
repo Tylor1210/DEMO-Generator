@@ -4,7 +4,8 @@
   --card: #ffffff;
   --muted: #5d6270;
   --line: #dfe1e6;
-  --signal: #c8f135; /* one accent, used for progress and highlights */
+  --signal: #5b5bd6; /* brand indigo from the tycodes mark: progress and highlights */
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   --danger: #b42318;
   --display: 'Familjen Grotesk', system-ui, sans-serif;
   --body: 'Inter', system-ui, sans-serif;
@@ -19,8 +20,17 @@ a { color: inherit; }
 /* Mobile first: one column with a 16px gutter. */
 .page { min-height: 100svh; padding: 0 16px 48px; }
 .top { display: flex; align-items: center; min-height: 64px; }
-.logo { font-family: var(--display); font-weight: 700; font-size: 22px; text-decoration: none; letter-spacing: -0.02em; display: inline-flex; align-items: center; min-height: 44px; }
-.logo span { background: var(--ink); color: var(--signal); padding: 0 6px; border-radius: 6px; margin-left: 1px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; text-decoration: none; }
+.logo .mark { flex: none; }
+.logo .word { font-family: var(--mono); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; display: inline-flex; align-items: center; }
+/* ".dev"/".app" plus the cursor live in a fixed-width box, so the nav doesn't shift while it types */
+.logo .tail { display: inline-flex; align-items: center; min-width: calc(4ch + 0.65em); }
+.logo .tld { color: var(--signal); white-space: pre; }
+.logo .cursor { width: 0.55em; height: 1.05em; background: var(--signal); margin-left: 1px; }
+@media (prefers-reduced-motion: no-preference) {
+  .logo .cursor:not(.typing) { animation: blink 1.05s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+}
 
 .home { display: grid; gap: 24px; max-width: 1080px; margin: 0 auto; padding-top: 16px; }
 .home.narrow { max-width: 720px; }
@@ -49,8 +59,10 @@ textarea { resize: vertical; }
 .drop { position: relative; display: grid; place-items: center; min-height: 64px; border: 1.5px dashed var(--line); border-radius: var(--r); font-weight: 600; cursor: pointer; }
 .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .thumbs { list-style: none; display: grid; gap: 10px; }
-.thumbs li { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; }
-.thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; grid-row: span 2; }
+.thumbs li { display: grid; grid-template-columns: 56px 1fr; gap: 8px 10px; align-items: center; }
+.thumbs .pname { min-height: 44px; font: inherit; font-size: 15px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: var(--r); width: 100%; }
+.field em { font-style: normal; font-weight: 500; color: var(--muted); }
+.thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; grid-row: span 3; align-self: start; }
 .seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: var(--r); overflow: hidden; }
 .seg button { font: inherit; font-size: 13px; font-weight: 600; min-height: 44px; padding: 0 12px; border: 0; background: #fff; cursor: pointer; }
 .seg button.on { background: var(--ink); color: #fff; }
@@ -82,7 +94,7 @@ textarea { resize: vertical; }
 .stages li.done { color: var(--ink); }
 .stages li.done .dot { background: var(--ink); border-color: var(--ink); }
 .stages li.running { color: var(--ink); font-weight: 600; }
-.stages li.running .dot { border-color: var(--ink); background: var(--signal); }
+.stages li.running .dot { border-color: var(--signal); background: var(--signal); }
 .stages li.blocked .dot, .stages li.failed .dot { border-color: var(--danger); }
 .stages .state { font-size: 13px; }
 .live { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
@@ -94,6 +106,7 @@ textarea { resize: vertical; }
 .objections { padding-left: 20px; display: grid; gap: 4px; font-size: 15px; }
 .trouble { display: grid; gap: 14px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.example { margin-top: 20px; }
 
 @media (prefers-reduced-motion: no-preference) {
   .live .chip, .sw { animation: pop 0.35s ease-out both; }

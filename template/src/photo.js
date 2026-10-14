@@ -79,8 +79,7 @@ async function analyze(url, shape, name) {
     return { cx: median(body.map(s => (s.x0 + s.x1) / 2)), r: wMed / 2, top, bottom, fit }
   }
   const best = [measure(centerRun), measure(outer)].filter(Boolean).sort((p, q) => p.fit - q.fit)[0]
-  // Proportions must roughly match the 3D shape, or the wrap would look wrong.
-  if (!best || best.fit > 0.25) return null
+  if (!best) return null
   // Topmost product row on the center column (a can's pull tab or a bottle's cap), not stray pattern shapes.
   const first = centerRun[0]?.y ?? best.top
   const runs = new Map(centerRun.map(s => [s.y, s]))
@@ -102,7 +101,8 @@ const analyzePhoto = (url, shape, name) => {
  */
 export async function photoLabelCanvas(url, shape, name) {
   const a = await analyzePhoto(url, shape, name)
-  if (!a) return null
+  // Proportions must roughly match the 3D shape, or the wrap would look wrong. (The cut-out has no such limit.)
+  if (!a || a.fit > 0.25 || !shape.labelY) return null
   const { src, sg, d, w, cx, r, top, bottom } = a
 
   // Label band rows in the photo, from the shape's label position.
@@ -184,4 +184,14 @@ export async function photoCutout(url, shape, name) {
   c.width = cw; c.height = ch
   c.getContext('2d').putImageData(out, 0, 0)
   return c.toDataURL('image/webp', 0.9)
+}
+
+/** Cut-out plus its width/height ratio, for the 3D billboard fallback. */
+export async function photoCutoutSized(url, shape, name) {
+  const src = await photoCutout(url, shape, name)
+  if (!src) return null
+  const a = await analyzePhoto(url, shape, name)
+  const x0 = Math.max(0, Math.floor(a.cx - a.r - 3)), x1 = Math.min(a.w, Math.ceil(a.cx + a.r + 3))
+  const y0 = Math.max(0, a.first - 2), y1 = Math.min(a.h, a.bottom + 4)
+  return { src, aspect: (x1 - x0) / (y1 - y0) }
 }

@@ -32,6 +32,9 @@ export function money(n) {
   return fmt.format(n)
 }
 
+// Shown near the 3D product and in the footer (BUILD: the 3D model is a simplified stand-in).
+export const modelNote = () => `The 3D packaging is a simplified model made for this concept demo. See the real product on ${brand.domain}.`
+
 export const bundleWord = () => brand.shop.bundleLabel || 'bundle'
 export const cap = s => s.charAt(0).toUpperCase() + s.slice(1)
 export const tagLabel = id => brand.filter?.options.find(o => o.id === id)?.label ?? null

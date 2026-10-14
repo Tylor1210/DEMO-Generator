@@ -20,7 +20,7 @@ tycodes demo pipeline (local)
 
 New run:
   npm run pipeline -- --url https://brand.com [--ig URL] [--email you@x.com] [--owner]
-                      [--image path:label|photo]... [--paste notes.txt] [--force] [--to 03_brief]
+                      [--image path:label|photo[:Product name]]... [--paste notes.txt] [--force] [--to 03_brief]
 Re-run from a stage (reads current earlier outputs, including your edits):
   npm run pipeline -- --run <id> --from 04_config      (or --from 4)
 Approve a run waiting for review (continues with the next stage):
@@ -141,15 +141,15 @@ async function main() {
   const id = `${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${slugify(host.replace(/^www\./, '').split('.')[0], 20)}-${randomId(4)}`
 
   const images = (a.image ?? []).map(spec => {
-    const i = spec.lastIndexOf(':')
-    const [path, kind] = i > 0 ? [spec.slice(0, i), spec.slice(i + 1)] : [spec, 'photo']
+    // path[:label|photo[:Product name]]
+    const [path, kind = 'photo', ...name] = spec.split(':')
     if (kind !== 'label' && kind !== 'photo') throw new Error(`--image ${spec}: kind must be label or photo`)
-    return { path: resolve(path), kind: kind as 'label' | 'photo' }
+    return { path: resolve(path), kind: kind as 'label' | 'photo', product: name.join(':') || undefined }
   })
   const payload = {
     url: a.url, igUrl: a.ig, email: a.email, ownerClaim: !!a.owner, force: !!a.force,
     pasted: a.paste ? readFileSync(resolve(a.paste), 'utf8') : undefined,
-    images: images.map(i => ({ file: basename(i.path), kind: i.kind })),
+    images: images.map(i => ({ file: basename(i.path), kind: i.kind, product: i.product })),
   }
   await createRun(store, payload, id)
   for (const i of images) await store.write(`runs/${id}/stages/01_intake/input/uploads/${basename(i.path)}`, readFileSync(i.path))
