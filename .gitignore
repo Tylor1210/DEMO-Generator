@@ -13,3 +13,5 @@ docs/icm-paper.pdf
 *.log
 .DS_Store
 coverage/
+.claude/
+docs/phase2/

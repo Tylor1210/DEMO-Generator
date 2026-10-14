@@ -2,7 +2,7 @@
 
 Paste a business website and get back a shoppable 3D scroll demo of its products, built from the brand's own words and checked against its own site. It is the engine behind [tycodes.app](https://tycodes.app) (launching soon).
 
-> Status: **Phase 1 of 5.** The pipeline runs locally from the command line. The 3D template, Cloudflare deployment and public site come in later phases.
+> Status: **Phase 2 of 5.** The pipeline runs locally from the command line, and one prebuilt 3D template renders any generated config. Cloudflare deployment and the public site come next.
 
 ## How it works
 
@@ -66,6 +66,18 @@ npm test
 ```
 
 Models are set in `.env` (`MODEL_STRONG`, `MODEL_CHEAP`). Every model call is logged with tokens and cost. `DAILY_SPEND_CAP_USD` (default $5) is a hard cap: each call reserves its worst-case cost first, so a call that could cross the cap is never sent.
+
+## The template
+
+`template/` is one Vite + React + three.js build that renders any `brand.config.json` at runtime. Shapes are parametric (can, bottle, dropper, jar, tube, tub, and a photo slab for anything else), fonts come from the curated pairs in `_config/font-pairs.md`, and a static version serves low-end devices, reduced motion and `?variant=static`.
+
+```bash
+cd template && npm install
+npm run dev                     # http://localhost:5181/d/<slug> renders demos/<slug>/ from a local run
+npm run build && npm run serve  # production build served the way the Worker will (http://localhost:5182/d/<slug>)
+```
+
+`/d/example-bubble` and `/d/example-culture-pop` render the L3 example configs. Add `?debug=1` for live analytics and `?variant=static` for the fallback.
 
 ## Credits
 

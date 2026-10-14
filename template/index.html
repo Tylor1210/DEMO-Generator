@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Concept demo | tycodes</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="theme-color" content="#f6f4ef" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--DEMO_CONFIG-->
+    <script>
+      // Brand colors and fonts before any JS bundle loads, so the first paint is already on-brand.
+      // Font pairs are generated from workspace/_config/font-pairs.md at build time.
+      window.__fontPairs = /*FONT_PAIRS*/{};
+      try {
+        var c = JSON.parse(document.getElementById('demo-config').textContent), t = c.theme, s = document.documentElement.style
+        var f = window.__fontPairs[c.fonts && c.fonts.pair] || window.__fontPairs.clean
+        s.setProperty('--bg', t.bg); s.setProperty('--page-bg', t.bg); s.setProperty('--ink', t.ink)
+        s.setProperty('--accent', t.accent); s.setProperty('--accent2', t.accent2)
+        if (f) {
+          s.setProperty('--display', '"' + f.display + '", system-ui, sans-serif'); s.setProperty('--body', '"' + f.body + '", system-ui, sans-serif')
+          s.setProperty('--display-weight', String(f.weight))
+          var fam = function (n, w) { return 'family=' + n.replace(/ /g, '+') + ':wght@' + w }
+          var l = document.createElement('link')
+          l.rel = 'stylesheet'; l.id = 'brand-fonts'
+          l.href = 'https://fonts.googleapis.com/css2?' + (f.display === f.body ? fam(f.display, '400;600;700;' + f.weight) : fam(f.display, f.weight) + '&' + fam(f.body, '400;600;700')) + '&display=swap'
+          document.head.appendChild(l)
+        }
+        document.title = c.brand + ' | concept demo'
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Pre-render of the hero from the inlined config. React replaces it with identical markup. -->
+      <div class="demobar" role="note"><p data-f="credit">Concept demo built by tycodes.dev.</p></div>
+      <header class="nav"><span class="logo" data-f="wordmark"></span></header>
+      <main>
+        <section class="section hero">
+          <div class="hero-copy front">
+            <p class="kicker" data-f="kicker"></p>
+            <h1 data-f="headline"></h1>
+            <p class="sub" data-f="sub"></p>
+            <div class="ctas"><span class="btn big" data-f="primaryCta"></span><span class="btn ghost" data-f="secondaryCta"></span></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script>
+      try {
+        var c = JSON.parse(document.getElementById('demo-config').textContent)
+        var v = { credit: 'Concept demo built by tycodes.dev. Not associated with or endorsed by ' + c.brand + '.', wordmark: c.wordmark }
+        document.querySelectorAll('[data-f]').forEach(function (e) { var k = e.getAttribute('data-f'); e.textContent = v[k] != null ? v[k] : c.hero[k] || '' })
+      } catch (e) {}
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

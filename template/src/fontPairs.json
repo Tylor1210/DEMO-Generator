@@ -1,0 +1,42 @@
+{
+  "poster": {
+    "display": "Anton",
+    "weight": 400,
+    "body": "Inter"
+  },
+  "rounded": {
+    "display": "Bricolage Grotesque",
+    "weight": 800,
+    "body": "Inter"
+  },
+  "editorial": {
+    "display": "DM Serif Display",
+    "weight": 400,
+    "body": "DM Sans"
+  },
+  "grotesk": {
+    "display": "Space Grotesk",
+    "weight": 700,
+    "body": "IBM Plex Sans"
+  },
+  "heritage": {
+    "display": "Fraunces",
+    "weight": 800,
+    "body": "Work Sans"
+  },
+  "bold-sans": {
+    "display": "Archivo Black",
+    "weight": 400,
+    "body": "Archivo"
+  },
+  "geometric": {
+    "display": "Syne",
+    "weight": 800,
+    "body": "Manrope"
+  },
+  "clean": {
+    "display": "Plus Jakarta Sans",
+    "weight": 800,
+    "body": "Plus Jakarta Sans"
+  }
+}
