@@ -169,7 +169,7 @@ function makeCtx(deps: Deps, runId: string, contract: Contract, usage: Usage): S
       await reserveSpend(store, env, worst)
       let r: ModelResult
       try {
-        r = await adapter.generate({ tier, system, user, jsonSchema, maxTokens: MAX_OUTPUT_TOKENS })
+        r = await adapter.generate({ tier, system, user, jsonSchema, maxTokens: MAX_OUTPUT_TOKENS, effort: contract.meta.effort as any })
       } catch (e: any) {
         // A 4xx means the API rejected the request and billed nothing. Anything else keeps the worst-case charge.
         if (typeof e?.status === 'number' && e.status >= 400 && e.status < 500) await settleSpend(store, worst, 0)

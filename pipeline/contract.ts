@@ -62,6 +62,7 @@ export function parseContract(md: string, stageHint = ''): Contract {
   const model = (meta.model || null) as Contract['model']
   if (model && !['strong', 'mid', 'cheap'].includes(model)) throw new ContractError(`${stage}: model must be strong, mid or cheap`)
   if (type === 'agent' && !model) throw new ContractError(`${stage}: agent stages need a model`)
+  if (meta.effort && !['low', 'medium', 'high'].includes(meta.effort)) throw new ContractError(`${stage}: effort must be low, medium or high`)
   const gate = (meta.gate || 'auto') as Contract['gate']
   if (gate !== 'auto' && gate !== 'review') throw new ContractError(`${stage}: gate must be auto or review`)
 

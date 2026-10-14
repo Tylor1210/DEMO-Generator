@@ -13,6 +13,17 @@ describe('factory stays in sync', () => {
     expect(catalog).toEqual([...SHAPES].sort())
     expect(template).toEqual([...SHAPES].sort())
   })
+  it('plain shape specs match the 3D geometry', async () => {
+    const { SHAPE_SPECS } = await import('../template/src/shapeSpecs.js')
+    const { getShape } = await import('../template/src/scene/shapes.js')
+    expect(Object.keys(SHAPE_SPECS).sort()).toEqual([...SHAPES].sort())
+    for (const name of SHAPES) {
+      const g = getShape(name), spec = SHAPE_SPECS[name]
+      expect(g.height, name).toBeCloseTo(spec.height, 3)
+      expect(g.band.r, name).toBeCloseTo(spec.bandR, 3)
+      expect(g.band.h, name).toBeCloseTo(spec.bandH, 3)
+    }
+  })
   it('template font pairs match font-pairs.md (run npm run schema after editing it)', () => {
     const md = tableIds(read('workspace/_config/font-pairs.md')).sort()
     const json = Object.keys(JSON.parse(read('template/src/fontPairs.json'))).sort()

@@ -1,7 +1,8 @@
 ---
 stage: 03_brief
 type: agent
-model: strong
+model: mid
+effort: low
 gate: review
 label: Writing your brief
 ---

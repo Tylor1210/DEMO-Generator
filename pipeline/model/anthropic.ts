@@ -9,7 +9,7 @@ export function anthropicAdapter(env: Env): ModelAdapter {
     tier === 'strong' ? env.MODEL_STRONG || 'claude-opus-5-5'
       : tier === 'mid' ? env.MODEL_MID || 'claude-sonnet-5-5'
         : env.MODEL_CHEAP || 'claude-haiku-5-5'
-  const effort = (env.MODEL_EFFORT || 'medium') as 'low' | 'medium' | 'high'
+  const defaultEffort = (env.MODEL_EFFORT || 'medium') as 'low' | 'medium' | 'high'
 
   return {
     name: 'anthropic',
@@ -24,7 +24,7 @@ export function anthropicAdapter(env: Env): ModelAdapter {
         system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: req.user }],
         output_config: {
-          effort,
+          effort: req.effort ?? defaultEffort,
           ...(req.jsonSchema ? { format: { type: 'json_schema', schema: req.jsonSchema as Record<string, unknown> } } : {}),
         },
         ...(withFallback ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),

@@ -1,9 +1,11 @@
 import * as THREE from 'three'
+import { SHAPE_SPECS } from '../shapeSpecs'
 
 // Parametric packaging shapes. Every shape is centered on y = 0 and reports its height,
 // so the scene can size any product the same way. Label "band" dims are used to give the
 // label canvas the right aspect ratio (no stretched text).
 //
+// labelY comes from shapeSpecs.js (the label band's [bottom, top], used to unroll product photos).
 // Parts: { geo, mat: 'label' | 'body' | 'cap' | 'accent' | 'metal' | 'photo' }
 // thetaStart / phiStart = PI puts u = 0.5 (center of the label art) facing the camera.
 // workspace/_config/shape-catalog.md lists these names for the pipeline. Keep them in sync.
@@ -157,6 +159,9 @@ export const SHAPES = Object.keys(builders)
 export const visualSize = sh => Math.max(sh.height, sh.width * 1.45)
 
 export function getShape(name) {
-  if (!cache.has(name)) cache.set(name, (builders[name] || bottle)())
+  if (!cache.has(name)) {
+    const key = builders[name] ? name : 'bottle'
+    cache.set(name, { ...builders[key](), labelY: SHAPE_SPECS[key].labelY })
+  }
   return cache.get(name)
 }

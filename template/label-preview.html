@@ -1,0 +1,22 @@
+<!doctype html>
+<!-- Dev only: shows each product photo next to the wrap-around label made from it.
+     Open http://localhost:5181/label-preview.html?demo=<slug> while `npm run dev` runs. -->
+<html><head><meta charset="utf-8"><title>Label preview</title>
+<style>body{font:14px system-ui;margin:16px;background:#eee}.row{display:flex;gap:12px;align-items:center;margin:0 0 12px}.row img{height:180px}.row canvas{height:180px;background:#fff}</style></head>
+<body><div id="out"></div>
+<script type="module">
+import { photoLabelCanvas } from './src/photo.js'
+import { specFor } from './src/shapeSpecs.js'
+const slug = new URLSearchParams(location.search).get('demo')
+const cfg = await (await fetch(`/api/demos/${slug}`)).json()
+for (const p of cfg.products) {
+  if (!p.image) continue
+  const url = `/api/assets/demos/${slug}/${p.image}`
+  const row = document.createElement('div'); row.className = 'row'
+  row.innerHTML = `<img src="${url}"><b>${p.name} (${p.shape})</b>`
+  const canvas = await photoLabelCanvas(url, specFor(p.shape), p.shape).catch(e => (console.error(e), null))
+  row.append(canvas ? canvas : Object.assign(document.createElement('span'), { textContent: 'no usable photo, generated label kept' }))
+  document.getElementById('out').append(row)
+}
+document.body.dataset.done = '1'
+</script></body></html>

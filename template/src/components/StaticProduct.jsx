@@ -1,9 +1,33 @@
 // CSS-only product render. Paints instantly, used for the static variant, low-end devices,
 // reduced motion, and as the placeholder before 3D loads (hidden once html.has-3d is set).
 // Photo-shape products show their real product photo instead.
+import { useEffect, useState } from 'react'
 import { asset, brand } from '../brand'
+import { specFor } from '../shapeSpecs'
+import { photoCutout } from '../photo'
+
+// Real product photo with its background keyed out, when the photo allows it.
+function useCutout(product) {
+  const [src, setSrc] = useState(null)
+  useEffect(() => {
+    setSrc(null)
+    if (!product.image || product.shape === 'photo' || product.label) return
+    let live = true
+    photoCutout(asset(product.image), specFor(product.shape), product.shape).then(u => { if (live) setSrc(u) })
+    return () => { live = false }
+  }, [product])
+  return src
+}
 
 export default function StaticProduct({ product, className = '' }) {
+  const cut = useCutout(product)
+  if (cut) {
+    return (
+      <div className={`sp sp-photo sp-cut ${className}`} aria-hidden="true">
+        <img src={cut} alt="" />
+      </div>
+    )
+  }
   const photo = product.shape === 'photo' ? asset(product.photo || product.image) : null
   if (photo) {
     return (

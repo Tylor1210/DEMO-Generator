@@ -3,6 +3,10 @@ import * as THREE from 'three'
 import { asset } from '../brand'
 import { getShape } from './shapes'
 import { makeLabel, shade } from './makeLabel'
+import { photoLabel } from './photoLabel'
+
+// ?labels=generated turns photo labels off (handy for comparing).
+const photoLabelsOn = !/labels=generated/.test(location.search)
 
 const loader = new THREE.TextureLoader()
 
@@ -45,6 +49,23 @@ const Product = forwardRef(function Product({ product, ...props }, ref) {
   }, [product, shape])
 
   useEffect(() => () => Object.values(mats).forEach(m => { m.map?.dispose(); m.dispose() }), [mats])
+
+  // No uploaded label art: try wrapping the brand's own product photo around the pack.
+  useEffect(() => {
+    if (product.label || !product.image || !shape.labelY || !photoLabelsOn) return
+    let live = true
+    photoLabel(asset(product.image), product.shape)
+      .then(tex => {
+        if (!tex) return
+        if (!live) { tex.dispose(); return }
+        const old = mats.label.map
+        mats.label.map = tex
+        mats.label.needsUpdate = true
+        old?.dispose()
+      })
+      .catch(() => { /* keep the generated label */ })
+    return () => { live = false }
+  }, [mats, product, shape])
 
   return (
     <group ref={ref} {...props}>

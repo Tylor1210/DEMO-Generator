@@ -21,6 +21,7 @@ export interface ModelRequest {
   user: string
   jsonSchema?: object
   maxTokens?: number
+  effort?: 'low' | 'medium' | 'high'
 }
 export interface ModelResult {
   text: string
