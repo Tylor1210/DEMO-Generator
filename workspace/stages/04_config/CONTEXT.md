@@ -1,7 +1,7 @@
 ---
 stage: 04_config
 type: agent
-model: strong
+model: mid
 gate: auto
 label: Designing your demo
 ---

@@ -13,7 +13,7 @@ export interface Workspace {
   list(prefix: string): Promise<string[]>
 }
 
-export type Tier = 'strong' | 'cheap'
+export type Tier = 'strong' | 'mid' | 'cheap'
 
 export interface ModelRequest {
   tier: Tier

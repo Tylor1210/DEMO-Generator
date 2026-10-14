@@ -73,4 +73,4 @@ The pipeline structure follows **Interpretable Context Methodology** by Van Clie
 
 ## License
 
-TBD
+MIT. See [LICENSE](LICENSE).

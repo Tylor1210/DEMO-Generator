@@ -6,7 +6,7 @@ interface AiBinding { run(model: string, input: unknown): Promise<any> }
 
 export function workersAiAdapter(env: Env, ai: AiBinding): ModelAdapter {
   const modelFor = (tier: Tier) =>
-    (tier === 'strong' ? env.WORKERS_AI_STRONG : env.WORKERS_AI_CHEAP) || '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+    (tier === 'cheap' ? env.WORKERS_AI_CHEAP : env.WORKERS_AI_STRONG) || '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
   return {
     name: 'workers-ai',
     modelFor,

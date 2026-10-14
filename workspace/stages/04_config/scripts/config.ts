@@ -16,7 +16,7 @@ export async function run(ctx: StageCtx) {
       : `${user}\n\nYour previous answer failed validation. Fix these problems and return the full JSON again:\n${lastErr}`
     let raw: unknown
     try {
-      const r = await ctx.callModel('strong', system, prompt, schema)
+      const r = await ctx.callModel(ctx.contract.model ?? 'strong', system, prompt, schema)
       raw = r.json ?? extractJson(r.text)
     } catch (e: any) {
       // Some providers reject large schemas. Fall back to prompt-only JSON and let zod do the checking.

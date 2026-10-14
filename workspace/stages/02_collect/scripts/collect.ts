@@ -330,7 +330,9 @@ function buildSiteMd(pages: PageData[], products: CondensedProduct[], input: Inp
     parts.push(`## ${p.url ?? `product: ${p.name}`}`)
     parts.push(`Product: ${p.name}`)
     if (p.type) parts.push(`Type: ${p.type}`)
-    if (p.price) parts.push(`Price: ${p.price} ${currency}${p.compareAt ? ` (was ${p.compareAt})` : ''}`)
+    // One option means the price is for that option ("12 Pack"); keep them on one quotable line.
+    const per = p.options.length === 1 ? ` for ${p.options[0]}` : ''
+    if (p.price) parts.push(`Price: ${p.price} ${currency}${per}${p.compareAt ? ` (was ${p.compareAt})` : ''}`)
     if (p.options.length) parts.push(`Options: ${p.options.join(', ')}`)
     if (p.description) parts.push(p.description)
     parts.push('')
