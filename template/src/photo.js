@@ -66,23 +66,33 @@ async function analyze(url, shape, name) {
     for (let x = w - 3; x > 1; x--) if (!isBg(x, y)) { a1 = x; break }
     if (a0 >= 0 && a1 - a0 > w * 0.05) outer.push({ y, x0: a0, x1: a1, width: a1 - a0 })
   }
-  const shapeRatio = shape.height / (shape.bandR * 2)
+  const shapeRatio = (shape.bodyY[1] - shape.bodyY[0]) / (shape.bandR * 2)
   const measure = spans => {
     if (spans.length < h * 0.25) return null
     const wMed = median(spans.map(s => s.width))
     // Body rows: close to the typical width (skips pull tabs, caps, shoulders and stray shapes).
-    const body = spans.filter(s => Math.abs(s.width - wMed) < wMed * 0.1)
+    const near = spans.filter(s => Math.abs(s.width - wMed) < wMed * 0.1)
+    // The body is the longest unbroken stretch of those rows (small gaps allowed), so a cream piled above
+    // a jar, a cap, or a stray shape doesn't count.
+    let body = [], cur = []
+    for (const s of near) {
+      if (cur.length && s.y - cur[cur.length - 1].y > h * 0.03) { if (cur.length > body.length) body = cur; cur = [] }
+      cur.push(s)
+    }
+    if (cur.length > body.length) body = cur
     if (body.length < h * 0.2) return null
-    const top = name === 'can' ? body[0].y : spans[0].y
-    const bottom = name === 'can' ? body[body.length - 1].y : spans[spans.length - 1].y
-    const fit = Math.abs((bottom - top) / wMed / shapeRatio - 1)
-    return { cx: median(body.map(s => (s.x0 + s.x1) / 2)), r: wMed / 2, top, bottom, fit }
+    const top = body[0].y, bottom = body[body.length - 1].y
+    // How much taller (or shorter) the real body is than our 3D body; the 3D shape stretches to match.
+    const stretch = (bottom - top) / wMed / shapeRatio
+    return { cx: median(body.map(s => (s.x0 + s.x1) / 2)), r: wMed / 2, top, bottom, stretch, fit: Math.abs(Math.log(stretch)), spans, bodyLen: body.length }
   }
-  const best = [measure(centerRun), measure(outer)].filter(Boolean).sort((p, q) => p.fit - q.fit)[0]
+  // Keep the method that finds the longest unbroken body. White print on a white-background photo
+  // breaks the center run (it looks like background), but not the outer edges.
+  const best = [measure(centerRun), measure(outer)].filter(Boolean).sort((p, q) => q.bodyLen - p.bodyLen || p.fit - q.fit)[0]
   if (!best) return null
   // Topmost product row on the center column (a can's pull tab or a bottle's cap), not stray pattern shapes.
-  const first = centerRun[0]?.y ?? best.top
-  const runs = new Map(centerRun.map(s => [s.y, s]))
+  const first = best.spans[0]?.y ?? best.top
+  const runs = new Map(best.spans.map(s => [s.y, s]))
   return { src, sg, d, w, h, bg, first, runs, ...best }
 }
 
@@ -101,18 +111,19 @@ const analyzePhoto = (url, shape, name) => {
  */
 export async function photoLabelCanvas(url, shape, name) {
   const a = await analyzePhoto(url, shape, name)
-  // Proportions must roughly match the 3D shape, or the wrap would look wrong. (The cut-out has no such limit.)
-  if (!a || a.fit > 0.25 || !shape.labelY) return null
-  const { src, sg, d, w, cx, r, top, bottom } = a
+  // The 3D shape can stretch 0.6x to 1.8x in height to match the real product; beyond that the wrap would look wrong.
+  if (!a || !shape.labelY || a.stretch < 0.6 || a.stretch > 1.8) return null
+  const { src, sg, d, w, cx, r, top, bottom, stretch } = a
 
-  // Label band rows in the photo, from the shape's label position.
+  // Label band rows in the photo: the shape's label position, measured within its body.
   const [ly0, ly1] = shape.labelY
-  const toRow = yShape => top + ((shape.height / 2 - yShape) / shape.height) * (bottom - top)
+  const [by0, by1] = shape.bodyY
+  const toRow = yShape => top + ((by1 - yShape) / (by1 - by0)) * (bottom - top)
   const sy0 = toRow(ly1), sy1 = toRow(ly0)
 
   // Output canvas: the full 360 degree wrap, front at the center.
   const W = Math.min(innerWidth, innerHeight) < 600 ? 1024 : 2048
-  const H = Math.round(Math.min(W * 0.78, Math.max(W * 0.14, (W * shape.bandH) / (2 * Math.PI * shape.bandR))))
+  const H = Math.round(Math.min(W * 0.78, Math.max(W * 0.14, (W * shape.bandH * stretch) / (2 * Math.PI * shape.bandR))))
   const out = document.createElement('canvas')
   out.width = W; out.height = H
   const g = out.getContext('2d')
@@ -132,7 +143,7 @@ export async function photoLabelCanvas(url, shape, name) {
   g.fillRect(0, 0, W, H)
 
   // Front: unroll the visible half. A column at angle t sits at x = cx + r sin(t) in the photo.
-  const maxT = (78 * Math.PI) / 180
+  const maxT = (70 * Math.PI) / 180 // stop short of the very edge, where the photo has background and glare
   const cols = Math.round((maxT / (2 * Math.PI)) * W)
   for (let i = -cols; i <= cols; i++) {
     const t = (i / W) * 2 * Math.PI
@@ -150,7 +161,7 @@ export async function photoLabelCanvas(url, shape, name) {
     g.fillRect(Math.min(x, x - side * W * 0.03), 0, W * 0.03, H)
   }
 
-  return out
+  return { canvas: out, stretch, color: `rgb(${body3.join(',')})` }
 }
 
 // The product cut out of its photo (background keyed out), for the static fallback. Data URL or null.
@@ -161,23 +172,36 @@ export async function photoCutout(url, shape, name) {
   const x0 = Math.max(0, Math.floor(cx - r - 3)), x1 = Math.min(w, Math.ceil(cx + r + 3))
   const y0 = Math.max(0, first - 2), y1 = Math.min(a.h, bottom + 4)
   const cw = x1 - x0, ch = y1 - y0
+  // Background = pixels close to the background color that connect to the edge of the crop (flood fill).
+  // White details on the product itself (a white logo) aren't connected to the edge, so they stay.
   const out = sg.createImageData(cw, ch)
-  const lo = 22 ** 2, hi = 48 ** 2
+  const near = 34 ** 2, far = 60 ** 2
+  const bgMask = new Uint8Array(cw * ch)
+  const stack = []
+  const isBgAt = (x, y) => dist2(d, ((y + y0) * w + (x + x0)) * 4, bg) < near
+  for (let x = 0; x < cw; x++) { stack.push(x, 0, x, ch - 1) }
+  for (let y = 0; y < ch; y++) { stack.push(0, y, cw - 1, y) }
+  while (stack.length) {
+    const y = stack.pop(), x = stack.pop()
+    if (x < 0 || y < 0 || x >= cw || y >= ch) continue
+    const k = y * cw + x
+    if (bgMask[k] || !isBgAt(x, y)) continue
+    bgMask[k] = 1
+    stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1)
+  }
   for (let y = 0; y < ch; y++) {
     for (let x = 0; x < cw; x++) {
-      const i = ((y + y0) * w + (x + x0)) * 4, o = (y * cw + x) * 4
-      const k = dist2(d, i, bg)
+      const k = y * cw + x, i = ((y + y0) * w + (x + x0)) * 4, o = k * 4
       out.data[o] = d[i]; out.data[o + 1] = d[i + 1]; out.data[o + 2] = d[i + 2]
-      // Above the body (tab, cap, shoulders) keep only the product run measured on that row,
-      // so background shapes beside it are dropped.
-      const dx = Math.abs(x + x0 - cx), aboveBody = y + y0 < a.top
-      if (aboveBody) {
+      // Above the body (tab, cap, cream) keep only the product run measured on that row; pattern shapes beside it go.
+      if (y + y0 < a.top) {
         const run = a.runs.get(y + y0)
         if (!run || x + x0 < run.x0 - 1 || x + x0 > run.x1 + 1 || run.x1 - run.x0 > 2.2 * r) { out.data[o + 3] = 0; continue }
       }
-      // Soft key: background-colored pixels fade out; the body itself stays solid.
-      const inside = !aboveBody && dx < r * 0.9
-      out.data[o + 3] = inside ? 255 : Math.round(255 * Math.min(1, Math.max(0, (k - lo) / (hi - lo))))
+      if (!bgMask[k]) { out.data[o + 3] = 255; continue }
+      // Soft edge: background pixels right next to the product fade by how close they are to the background color.
+      const touches = (x > 0 && !bgMask[k - 1]) || (x < cw - 1 && !bgMask[k + 1]) || (y > 0 && !bgMask[k - cw]) || (y < ch - 1 && !bgMask[k + cw])
+      out.data[o + 3] = touches ? Math.round(255 * Math.min(1, Math.max(0, (dist2(d, i, bg) - near * 0.4) / (far - near * 0.4)))) : 0
     }
   }
   const c = document.createElement('canvas')

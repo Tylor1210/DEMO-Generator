@@ -14,8 +14,9 @@ for (const p of cfg.products) {
   const url = `/api/assets/demos/${slug}/${p.image}`
   const row = document.createElement('div'); row.className = 'row'
   row.innerHTML = `<img src="${url}"><b>${p.name} (${p.shape})</b>`
-  const canvas = await photoLabelCanvas(url, specFor(p.shape), p.shape).catch(e => (console.error(e), null))
-  row.append(canvas ? canvas : Object.assign(document.createElement('span'), { textContent: 'no usable photo, generated label kept' }))
+  const res = await photoLabelCanvas(url, specFor(p.shape), p.shape).catch(e => (console.error(e), null))
+  if (res) row.append(Object.assign(document.createElement('span'), { textContent: `height x${res.stretch.toFixed(2)}` }))
+  row.append(res ? res.canvas : Object.assign(document.createElement('span'), { textContent: 'no usable photo, generated label kept' }))
   document.getElementById('out').append(row)
 }
 document.body.dataset.done = '1'

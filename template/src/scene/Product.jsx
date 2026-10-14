@@ -56,19 +56,26 @@ const Product = forwardRef(function Product({ product, ...props }, ref) {
   // No uploaded label art: wrap the product's own photo around the pack. If the photo doesn't fit the
   // shape's proportions (or the shape is "photo"), show the photo cut out as a floating billboard instead.
   const [billboard, setBillboard] = useState(null)
+  const [stretch, setStretch] = useState(1) // the real product is this much taller (relative to width) than our shape; we slim the shape to match
   useEffect(() => {
     if (product.label || !product.image || !photoLabelsOn) return
     let live = true
     const url = asset(product.image)
     const wrap = shape.labelY && product.shape !== 'photo' ? photoLabel(url, product.shape) : Promise.resolve(null)
     wrap
-      .then(async tex => {
-        if (tex) {
-          if (!live) { tex.dispose(); return }
+      .then(async res => {
+        if (res) {
+          if (!live) { res.tex.dispose(); return }
           const old = mats.label.map
-          mats.label.map = tex
+          mats.label.map = res.tex
           mats.label.needsUpdate = true
           old?.dispose()
+          // The rest of the pack (rim, lid, shoulders) takes the photo's own color, so it matches the label.
+          if (product.shape !== 'can') {
+            mats.body.color.set(res.color)
+            mats.cap.color.set(res.color).lerp(new THREE.Color('#ffffff'), 0.25)
+          }
+          setStretch(res.stretch)
           return
         }
         const cut = await photoCutoutSized(url, specFor(product.shape), product.shape)
@@ -85,7 +92,7 @@ const Product = forwardRef(function Product({ product, ...props }, ref) {
     <group ref={ref} {...props}>
       {billboard
         ? <Billboard map={billboard.map} aspect={billboard.aspect} height={shape.height} />
-        : shape.parts.map((p, i) => <mesh key={i} geometry={p.geo} material={mats[p.mat]} />)}
+        : <group scale={[1 / stretch, 1, 1 / stretch]}>{shape.parts.map((p, i) => <mesh key={i} geometry={p.geo} material={mats[p.mat]} />)}</group>}
     </group>
   )
 })

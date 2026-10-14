@@ -4,10 +4,10 @@ import { photoLabelCanvas } from '../photo'
 import { specFor } from '../shapeSpecs'
 
 export async function photoLabel(url, shapeName) {
-  const canvas = await photoLabelCanvas(url, specFor(shapeName), shapeName)
-  if (!canvas) return null
-  const tex = new THREE.CanvasTexture(canvas)
+  const res = await photoLabelCanvas(url, specFor(shapeName), shapeName)
+  if (!res) return null
+  const tex = new THREE.CanvasTexture(res.canvas)
   tex.colorSpace = THREE.SRGBColorSpace
   tex.anisotropy = 8
-  return tex
+  return { tex, stretch: res.stretch, color: res.color }
 }
