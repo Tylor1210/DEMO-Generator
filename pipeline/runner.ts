@@ -2,7 +2,7 @@
 import { parseContract, globToRegExp, isGlob, type Contract } from './contract.ts'
 import type { Env, Manifest, ModelAdapter, ModelResult, Progress, Store, Tier, Workspace } from './types.ts'
 import { CapReached, StageBlocked } from './types.ts'
-import { assertUnderCap, recordSpend } from './costs.ts'
+import { costOf, reserveSpend, settleSpend } from './costs.ts'
 import { dec, enc, estTokens } from './lib/text.ts'
 import { STAGE_IMPLS } from './registry.ts'
 
@@ -14,6 +14,7 @@ export const stagePath = (runId: string, rel: string) => `runs/${runId}/stages/$
 export const manifestPath = (runId: string) => `runs/${runId}/manifest.json`
 
 const CONTEXT_BUDGET = 10_000
+const MAX_OUTPUT_TOKENS = 16_000
 
 export interface Deps {
   store: Store
@@ -160,12 +161,24 @@ function makeCtx(deps: Deps, runId: string, contract: Contract, usage: Usage): S
       return { system, user, tokens }
     },
     async callModel(tier, system, user, jsonSchema) {
-      await assertUnderCap(store, env)
       const adapter = deps.model()
-      const r = await adapter.generate({ tier, system, user, jsonSchema })
+      const model = adapter.modelFor(tier)
+      // Worst case: estimated input plus a 25% margin, and every allowed output token.
+      const worst = adapter.name === 'workers-ai' ? 0
+        : costOf(model, Math.ceil(estTokens(system + user + JSON.stringify(jsonSchema ?? '')) * 1.25), MAX_OUTPUT_TOKENS, env)
+      await reserveSpend(store, env, worst)
+      let r: ModelResult
+      try {
+        r = await adapter.generate({ tier, system, user, jsonSchema, maxTokens: MAX_OUTPUT_TOKENS })
+      } catch (e: any) {
+        // A 4xx means the API rejected the request and billed nothing. Anything else keeps the worst-case charge.
+        if (typeof e?.status === 'number' && e.status >= 400 && e.status < 500) await settleSpend(store, worst, 0)
+        throw e
+      }
+      await settleSpend(store, worst, r.costUsd)
       usage.tin += r.tokensIn; usage.tout += r.tokensOut; usage.cost += r.costUsd; usage.model = r.model
-      await recordSpend(store, r.costUsd)
       log(`  ${r.model}: ${r.tokensIn} in / ${r.tokensOut} out, $${r.costUsd.toFixed(4)}`)
+      if (r.failure) throw new Error(r.failure)
       return r
     },
     flagReview(reason) { usage.review = reason },

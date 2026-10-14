@@ -15,7 +15,10 @@ export function priceFor(model: string, env: Env): [number, number] {
   if (env.MODEL_PRICES) {
     try { table = { ...table, ...JSON.parse(env.MODEL_PRICES) } } catch { /* keep defaults */ }
   }
-  return table[model] ?? [0, 0]
+  const price = table[model]
+  // An unknown price would make the cap blind to this model, so refuse instead of guessing $0.
+  if (!price) throw new Error(`No price known for model "${model}". Add it to MODEL_PRICES before using it.`)
+  return price
 }
 
 export const costOf = (model: string, tin: number, tout: number, env: Env) => {
@@ -34,17 +37,37 @@ async function readLedger(store: Store): Promise<Ledger> {
   return raw ? JSON.parse(dec.decode(raw)) : { spentUsd: 0, calls: 0 }
 }
 
-export async function assertUnderCap(store: Store, env: Env) {
-  const cap = Number(env.DAILY_SPEND_CAP_USD ?? 5)
-  const l = await readLedger(store)
-  if (l.spentUsd >= cap) {
-    throw new CapReached(`Daily model spend cap reached ($${l.spentUsd.toFixed(2)} of $${cap}). The run is queued for tomorrow.`)
-  }
+// Hard cap. Before each call we reserve its worst case (all input tokens plus max_tokens of output).
+// If the reservation would cross the cap, the call never happens. After the call we settle to the real cost.
+// Calls that fail after the API may have billed keep the worst-case charge, so the ledger can only over-count.
+// The Worker (Phase 3) must do the same reserve/settle as one atomic D1 statement.
+const HARD_DEFAULT_CAP = 5
+
+export function dailyCap(env: Env): number {
+  const n = Number(env.DAILY_SPEND_CAP_USD)
+  return Number.isFinite(n) && n > 0 ? n : HARD_DEFAULT_CAP
 }
 
-export async function recordSpend(store: Store, usd: number) {
+export async function reserveSpend(store: Store, env: Env, worstUsd: number): Promise<void> {
+  const cap = dailyCap(env)
   const l = await readLedger(store)
-  l.spentUsd = Math.round((l.spentUsd + usd) * 1e6) / 1e6
+  if (l.spentUsd + worstUsd > cap) {
+    throw new CapReached(
+      `Daily model spend cap: $${l.spentUsd.toFixed(2)} spent of $${cap.toFixed(2)}, and the next call could cost up to $${worstUsd.toFixed(2)}. The run is queued for tomorrow.`,
+    )
+  }
+  l.spentUsd = Math.round((l.spentUsd + worstUsd) * 1e6) / 1e6
   l.calls += 1
   await store.write(ledgerPath(), JSON.stringify(l, null, 2), 'application/json')
+}
+
+/** Replace a reservation with the real cost (pass 0 when the API refused the request and billed nothing). */
+export async function settleSpend(store: Store, reservedUsd: number, actualUsd: number): Promise<void> {
+  const l = await readLedger(store)
+  l.spentUsd = Math.max(0, Math.round((l.spentUsd - reservedUsd + actualUsd) * 1e6) / 1e6)
+  await store.write(ledgerPath(), JSON.stringify(l, null, 2), 'application/json')
+}
+
+export async function spentToday(store: Store): Promise<number> {
+  return (await readLedger(store)).spentUsd
 }

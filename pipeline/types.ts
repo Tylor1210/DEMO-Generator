@@ -29,6 +29,8 @@ export interface ModelResult {
   tokensIn: number
   tokensOut: number
   costUsd: number
+  /** Set when the call was billed but its output can't be used (refusal, cut off at max_tokens). */
+  failure?: string
 }
 export interface ModelAdapter {
   name: string

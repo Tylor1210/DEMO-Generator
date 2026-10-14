@@ -27,15 +27,15 @@ export function anthropicAdapter(env: Env): ModelAdapter {
         },
         ...(withFallback ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
       })
-      if (res.stop_reason === 'refusal') throw new Error(`Model declined the request (${res.stop_details?.category ?? 'no category'})`)
-      if (res.stop_reason === 'max_tokens') throw new Error('Model output hit max_tokens; the stage output would be cut off')
+      const failure = res.stop_reason === 'refusal' ? `Model declined the request (${res.stop_details?.category ?? 'no category'})`
+        : res.stop_reason === 'max_tokens' ? 'Model output hit max_tokens; the stage output would be cut off' : undefined
       const text = res.content.map(b => (b.type === 'text' ? b.text : '')).join('')
       const u = res.usage
       const tokensIn = u.input_tokens + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0)
       const tokensOut = u.output_tokens
       let json: unknown
-      if (req.jsonSchema) json = JSON.parse(text)
-      return { text, json, model: res.model, tokensIn, tokensOut, costUsd: costOf(model, tokensIn, tokensOut, env) }
+      if (req.jsonSchema && !failure) json = JSON.parse(text)
+      return { text, json, model: res.model, tokensIn, tokensOut, costUsd: costOf(model, tokensIn, tokensOut, env), failure }
     },
   }
 }

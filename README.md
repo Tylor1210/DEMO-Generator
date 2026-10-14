@@ -65,7 +65,7 @@ npm run pipeline -- --url https://brand.com --image label.png:label --paste note
 npm test
 ```
 
-Models are set in `.env` (`MODEL_STRONG`, `MODEL_CHEAP`). Every model call is logged with tokens and cost, and `DAILY_SPEND_CAP_USD` stops runs when the day's spend is reached.
+Models are set in `.env` (`MODEL_STRONG`, `MODEL_CHEAP`). Every model call is logged with tokens and cost. `DAILY_SPEND_CAP_USD` (default $5) is a hard cap: each call reserves its worst-case cost first, so a call that could cross the cap is never sent.
 
 ## Credits
 
