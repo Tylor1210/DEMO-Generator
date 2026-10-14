@@ -26,7 +26,7 @@ Read the evidence and write the brand brief a designer and copywriter would buil
 
 ## Process
 1. Decide the category and price tier (`budget`, `mid`, `premium` or `unknown`) from the evidence.
-2. Pick 3 to 5 hero products the brand sells now. Prefer the core line over merch, gift cards and bundles. Mark the flagship.
+2. Pick 3 to 5 hero products the brand sells now. Prefer the core line over merch, gift cards, bundles and devices or tools that aren't packaged goods. If the visitor uploaded a photo of a product, that product is in and is the flagship. Otherwise mark the brand's best known product as the flagship.
 3. For each product: name as written, type, size, price (only if found), shape from the catalog, colors (`color`, `deep`, `ink` as hex) and an image path from `signals.json` if one matches. Up to 4 short notes, each backed by evidence.
 4. Write the 4 objection beats (safe, fit, price, where) in the framework's format. Each beat lists the evidence ids behind it.
 5. Pick a filter (skin type, flavor mood, heat level, roast) only if the site supports one. Each option points at one product.

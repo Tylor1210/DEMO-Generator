@@ -21,7 +21,7 @@ Turn the brief into a `brand.config.json` the template can render without code c
 
 ## Process
 1. Map the brief into the schema field by field. Product ids are lowercase slugs of the names.
-2. `featuredIndex` is the flagship product.
+2. `featuredIndex` is the flagship product from the brief (a product the visitor uploaded a photo of always wins).
 3. Copy the brief's evidence list into `evidence` unchanged. Every `claimIds`, `noteIds`, `subIds` and retailer `claimId` must point at an id in that list.
 4. `claims`: up to 6 chips of 2 to 5 words, each with its evidence id.
 5. Beats: keep the brief's questions and answers. `proof` is `claims` for safe, `filter` for fit (or `products` if there is no filter), `price` for price, `retailers` for where.

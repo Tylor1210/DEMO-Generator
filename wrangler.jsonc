@@ -22,7 +22,7 @@
 
   // Secrets (wrangler secret put): ANTHROPIC_API_KEY
   "vars": {
-    "PUBLIC_HOST": "tycodes-demo.tclont11.workers.dev",
+    "PUBLIC_HOST": "tycodes.app",
     "MODEL_PROVIDER": "anthropic",
     "MODEL_STRONG": "claude-opus-5-5",
     "MODEL_MID": "claude-sonnet-5-5",
@@ -35,6 +35,11 @@
     "BOOKING_URL": "https://calendar.app.google/M7xBbkAZA7xnNN8Y8"
   },
 
+  // The app lives on the root domain; www redirects to it. workers.dev stays on as a backup URL.
+  "routes": [
+    { "pattern": "tycodes.app", "custom_domain": true },
+    { "pattern": "www.tycodes.app", "custom_domain": true }
+  ],
   "workers_dev": true,
   "preview_urls": false,
   "observability": { "enabled": true, "head_sampling_rate": 1 }

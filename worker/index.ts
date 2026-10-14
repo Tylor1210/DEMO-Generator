@@ -20,6 +20,10 @@ const DEDUPE_DAYS = 7
 export default {
   async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(req.url)
+    if (url.hostname === 'www.tycodes.app') {
+      url.hostname = 'tycodes.app'
+      return Response.redirect(url.toString(), 301)
+    }
     const path = url.pathname
     let m: RegExpMatchArray | null
     try {
@@ -38,8 +42,18 @@ export default {
         return json({ bookingUrl: env.BOOKING_URL || '' }, 200, { 'cache-control': 'public, max-age=300' })
       }
       if (req.method === 'GET' && path === '/api/presets') {
-        const rows = await env.DB.prepare(`SELECT slug, domain FROM runs WHERE preset = 1 AND status = 'done' AND slug IS NOT NULL ORDER BY created_at`).all()
-        return json(rows.results ?? [], 200, { 'cache-control': 'public, max-age=300' })
+        // Example tiles for the home page: brand, featured product and its image, from each preset's config.
+        const rows = await env.DB.prepare(`SELECT slug, domain FROM runs WHERE preset = 1 AND status = 'done' AND slug IS NOT NULL ORDER BY created_at`).all<{ slug: string; domain: string }>()
+        const tiles = await Promise.all((rows.results ?? []).map(async r => {
+          const o = await env.BUCKET.get(`demos/${r.slug}/config.json`)
+          if (!o) return null
+          const c: any = await o.json()
+          const p = c.products?.[c.featuredIndex ?? 0] ?? c.products?.[0]
+          const img = p?.image ?? p?.photo
+          return { slug: r.slug, domain: r.domain, brand: c.brand, category: c.category, product: p?.name ?? '', color: p?.color ?? c.theme?.accent,
+            image: img ? `/api/assets/demos/${r.slug}/${img}` : null }
+        }))
+        return json(tiles.filter(Boolean), 200, { 'cache-control': 'public, max-age=300' })
       }
       if (req.method === 'POST' && path === '/api/events') return await events(req, env)
       if (req.method === 'POST' && (m = path.match(/^\/api\/report\/([a-z0-9-]+)$/))) {

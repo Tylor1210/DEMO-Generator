@@ -3,16 +3,11 @@ import { Logo } from './site'
 
 const MAX_IMAGES = 4
 
-// A pinned preset to try before filling in the form (Culture Pop when it's there).
-function useExample() {
-  const [ex, setEx] = useState(null)
-  useEffect(() => {
-    fetch('/api/presets').then(r => (r.ok ? r.json() : [])).then(list => {
-      const pick = list.find(p => p.domain === 'drinkculturepop.com') ?? list[0]
-      if (pick) setEx({ slug: pick.slug, name: pick.domain === 'drinkculturepop.com' ? 'Culture Pop' : pick.domain })
-    }).catch(() => {})
-  }, [])
-  return ex
+// Pinned presets, shown as example tiles before the visitor fills in the form.
+function usePresets() {
+  const [list, setList] = useState([])
+  useEffect(() => { fetch('/api/presets').then(r => (r.ok ? r.json() : [])).then(setList).catch(() => {}) }, [])
+  return list
 }
 
 export default function Home({ go }) {
@@ -27,7 +22,8 @@ export default function Home({ go }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const moreRef = useRef()
-  const example = useExample()
+  const presets = usePresets()
+  const [showExamples, setShowExamples] = useState(false)
 
   useEffect(() => { if (q.get('more') === '1') moreRef.current?.scrollIntoView({ block: 'center' }) }, [])
   useEffect(() => () => images.forEach(i => URL.revokeObjectURL(i.preview)), [images])
@@ -73,10 +69,28 @@ export default function Home({ go }) {
           <p className="eyebrow">Shoppable 3D product demos</p>
           <h1>Your turn. Paste your website.</h1>
           <p className="lede">We read your site, write the copy from your own words, and build a scroll demo your customers can shop. It takes about a minute.</p>
-          {example && (
-            <a className="ghost example" href={`/d/${example.slug}`}>
-              See an example first: {example.name}
-            </a>
+          {presets.length > 0 && (
+            <div className="examples">
+              <button type="button" className="ghost" aria-expanded={showExamples} onClick={() => setShowExamples(!showExamples)}>
+                {showExamples ? 'Hide examples' : 'See an example first'}
+              </button>
+              {showExamples && (
+                <ul className="tiles">
+                  {presets.map(p => (
+                    <li key={p.slug}>
+                      <a className="tile" href={`/d/${p.slug}`} style={{ '--tile': p.color }}>
+                        <span className="tile-img">{p.image && <img src={p.image} alt="" loading="lazy" />}</span>
+                        <span className="tile-text">
+                          <strong>{p.brand}</strong>
+                          <span>{p.product}</span>
+                          <span className="tile-cta">Open demo →</span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </section>
 
