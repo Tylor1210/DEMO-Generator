@@ -65,6 +65,8 @@ npm run pipeline -- --url https://brand.com --image label.png:label --paste note
 npm test
 ```
 
+**Run it on your Claude subscription instead of the API (local only):** set `MODEL_PROVIDER=manual` in `.env`. Agent stages then write their request to `runs/<id>/stages/<stage>/manual/` and pause; open the project in Claude Code and say "answer the pending pipeline requests", then re-run the printed command. Useful for presets and prompt tuning. Public runs always use the API.
+
 Models are set in `.env` (`MODEL_STRONG`, `MODEL_CHEAP`). Every model call is logged with tokens and cost. `DAILY_SPEND_CAP_USD` (default $5) is a hard cap: each call reserves its worst-case cost first, so a call that could cross the cap is never sent.
 
 ## The template

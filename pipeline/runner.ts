@@ -161,6 +161,7 @@ function makeCtx(deps: Deps, runId: string, contract: Contract, usage: Usage): S
       return { system, user, tokens }
     },
     async callModel(tier, system, user, jsonSchema) {
+      if (env.MODEL_PROVIDER === 'manual') return manualCall(store, runId, contract.stage, tier, system, user, jsonSchema, log)
       const adapter = deps.model()
       const model = adapter.modelFor(tier)
       // Worst case: estimated input plus a 25% margin, and every allowed output token.
@@ -198,6 +199,40 @@ function makeCtx(deps: Deps, runId: string, contract: Contract, usage: Usage): S
     async manifest() { return (await readManifest(store, runId))! },
   }
   return ctx
+}
+
+// MODEL_PROVIDER=manual (local only): instead of calling the API, write the request to a file and stop.
+// Claude Code (on your own subscription) answers it by writing the matching response file; re-running the
+// stage picks the response up. Requests are keyed by a hash, so an edited input makes a fresh request.
+async function manualCall(store: Store, runId: string, stage: string, tier: Tier, system: string, user: string,
+  jsonSchema: object | undefined, log: (m: string) => void): Promise<ModelResult> {
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(system + user + JSON.stringify(jsonSchema ?? null)))
+  const key = [...new Uint8Array(digest).slice(0, 6)].map(b => b.toString(16).padStart(2, '0')).join('')
+  const base = stagePath(runId, `${stage}/manual/${key}`)
+  const res = await store.read(`${base}.response.md`)
+  if (res) {
+    const text = dec.decode(res)
+    let json: unknown
+    if (jsonSchema) {
+      const t = text.replace(/^```(?:json)?\s*|\s*```\s*$/g, '')
+      json = JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1))
+    }
+    log(`  manual response ${key} used`)
+    return { text, json, model: 'manual', tokensIn: 0, tokensOut: 0, costUsd: 0 }
+  }
+  const request = [
+    `<!-- manual model request for ${stage} (${tier} tier). Answer it by writing ${base.split('/').pop()}.response.md next to this file. -->`,
+    `# Instructions for the answering model`,
+    jsonSchema
+      ? `Reply with one JSON object only (no prose, no code fence) that matches this JSON Schema:\n\n${JSON.stringify(jsonSchema)}`
+      : `Reply exactly as the user message asks (for example, inside <file path="..."> tags).`,
+    `\n# SYSTEM\n\n${system}`,
+    `\n# USER\n\n${user}`,
+  ].join('\n')
+  await store.write(`${base}.request.md`, request, 'text/markdown')
+  throw new StageBlocked(
+    `Waiting for a manual answer. In Claude Code, say "answer the pending pipeline requests" (or answer ${base}.request.md yourself), ` +
+    `then re-run: npm run pipeline -- --run ${runId} --from ${stage}`, ['manual'])
 }
 
 // Default agent behaviour: ask for every output inside <file path="..."> tags and write them.
