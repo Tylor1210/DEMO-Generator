@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "tycodes-demo",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // One static bundle: the generator site at / and the demo template under /_demo/.
+  // API and demo routes run the Worker first; everything else is a static file or the site's SPA shell.
+  "assets": {
+    "directory": "./site-dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/d/*"]
+  },
+
+  "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "tycodes-demos" }],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "tycodes-demo-db", "database_id": "2e024ec7-cc93-44b2-bdd6-b84c631530c7", "migrations_dir": "./migrations" }
+  ],
+  "workflows": [{ "binding": "PIPELINE", "name": "demo-pipeline", "class_name": "DemoPipeline" }],
+
+  // Secrets (wrangler secret put): ANTHROPIC_API_KEY
+  "vars": {
+    "PUBLIC_HOST": "tycodes-demo.tclont11.workers.dev",
+    "MODEL_PROVIDER": "anthropic",
+    "MODEL_STRONG": "claude-opus-5-5",
+    "MODEL_MID": "claude-sonnet-5-5",
+    "MODEL_CHEAP": "claude-haiku-5-5",
+    "MODEL_EFFORT": "medium",
+    "DAILY_SPEND_CAP_USD": "5",
+    "DAILY_RUN_CAP": "40",
+    "REVIEW_MODE": "auto",
+    "DEMO_TTL_DAYS": "30",
+    "BOOKING_URL": ""
+  },
+
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

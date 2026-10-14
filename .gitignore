@@ -15,3 +15,5 @@ docs/icm-paper.pdf
 coverage/
 .claude/
 docs/phase2/
+worker/generated/
+site-dist/

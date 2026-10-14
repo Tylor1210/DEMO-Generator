@@ -1,7 +1,7 @@
 import type { StageCtx } from '../../../../pipeline/runner.ts'
 import { StageBlocked } from '../../../../pipeline/types.ts'
 import { checkRobots, registrableDomain, safeFetch } from '../../../../pipeline/lib/net.ts'
-import { extractPage, ldNodes, stripTags, type PageData } from '../../../../pipeline/lib/html.ts'
+import { extract, ldNodes, stripTags, type PageData } from '../../../../pipeline/lib/html.ts'
 import { sniffImage } from '../../../../pipeline/lib/images.ts'
 import { parseColor, saturation, luminance } from '../../../../pipeline/lib/color.ts'
 import { dec, slugify, truncateText } from '../../../../pipeline/lib/text.ts'
@@ -49,7 +49,7 @@ export async function run(ctx: StageCtx) {
       if (home.status === 401 || home.status === 403 || home.status === 429) blockedWhy = `the site answered ${home.status}`
       else if (home.status >= 400) blockedWhy = `the site answered ${home.status}`
       else if (/cf-chl|captcha|just a moment\.\.\.|access denied/i.test(html) && html.length < 30_000) blockedWhy = 'it asked for a captcha'
-      else pages.push(extractPage(html, home.url))
+      else pages.push(await extract(html, home.url))
     } catch (e: any) {
       blockedWhy = /timeout|abort/i.test(e.message) ? 'it took too long to answer' : e.message
     }
@@ -102,7 +102,7 @@ export async function run(ctx: StageCtx) {
       try {
         const r = await safeFetch(u, { truncate: true })
         if (r.status !== 200 || !/html/.test(r.contentType)) continue
-        pages.push(extractPage(dec.decode(r.body), r.url))
+        pages.push(await extract(dec.decode(r.body), r.url))
         ctx.log(`  read ${r.url}`)
       } catch (e: any) { ctx.log(`  skipped ${u}: ${e.message}`) }
     }

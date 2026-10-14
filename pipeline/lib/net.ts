@@ -96,12 +96,22 @@ export async function safeFetch(
   const maxBytes = opts.maxBytes ?? MAX_BYTES
   const redirects: string[] = []
   let url = (await assertSafeUrl(raw)).toString()
+  let retried = false
   for (let hop = 0; hop < 6; hop++) {
     const res = await fetch(url, {
       redirect: 'manual',
       headers: { 'user-agent': USER_AGENT, accept: opts.accept ?? 'text/html,application/xhtml+xml,*/*;q=0.8' },
       signal: AbortSignal.timeout(opts.timeoutMs ?? TIMEOUT_MS),
     })
+    // Rate limited (Shopify throttles bursts): wait as asked, up to 8 s, and try once more.
+    if ((res.status === 429 || res.status === 503) && !retried) {
+      retried = true
+      await res.body?.cancel()
+      const after = Number(res.headers.get('retry-after'))
+      await new Promise(r => setTimeout(r, Math.min(8000, Number.isFinite(after) && after > 0 ? after * 1000 : 3000)))
+      hop--
+      continue
+    }
     if (res.status >= 300 && res.status < 400 && res.headers.get('location')) {
       await res.body?.cancel()
       url = (await assertSafeUrl(new URL(res.headers.get('location')!, url))).toString()

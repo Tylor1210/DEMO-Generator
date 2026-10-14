@@ -2,7 +2,7 @@
 
 Paste a business website and get back a shoppable 3D scroll demo of its products, built from the brand's own words and checked against its own site. It is the engine behind [tycodes.app](https://tycodes.app) (launching soon).
 
-> Status: **Phase 2 of 5.** The pipeline runs locally from the command line, and one prebuilt 3D template renders any generated config. Cloudflare deployment and the public site come next.
+> Status: **Phase 3 of 5.** The pipeline runs on Cloudflare (Worker + Workflow + R2 + D1) behind a public form, and locally from the command line. Preview: https://tycodes-demo.tclont11.workers.dev
 
 ## How it works
 
@@ -80,6 +80,22 @@ npm run build && npm run serve  # production build served the way the Worker wil
 ```
 
 `/d/example-bubble` and `/d/example-culture-pop` render the L3 example configs. Add `?debug=1` for live analytics and `?variant=static` for the fallback.
+
+## Cloud
+
+```
+web/        the generator site (form, live build page), Vite + React
+worker/     API routes, /d/:slug demo pages, the DemoPipeline Workflow (one step per stage), R2 + D1 store
+migrations/ D1 schema
+```
+
+The Worker bundles the same `workspace/` contracts (`npm run bundle:workspace`) and the same `pipeline/` code as the CLI. Each run's files live in R2 at `runs/<id>/stages/...`, mirroring the local layout.
+
+```bash
+npm run deploy                                     # schema, bundle workspace, build site + template, wrangler deploy
+npx wrangler d1 migrations apply tycodes-demo-db --remote
+npx wrangler secret put ANTHROPIC_API_KEY
+```
 
 ## Credits
 
