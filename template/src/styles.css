@@ -287,11 +287,10 @@ html.has-3d .detail-static { display: none; }
 .sp-photo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; border-radius: 18px; }
 
 /* Disclaimer under the hero product: small, readable, never covering the product */
-.hero-slot { position: relative; }
-.model-note {
-  position: absolute; left: 50%; bottom: 2vh; transform: translateX(-50%); width: min(340px, 90%);
-  font-size: 12px; line-height: 1.35; text-align: center; color: var(--muted);
-}
+.hero-slot { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.model-note { width: min(340px, 90%); font-size: 12px; line-height: 1.35; text-align: center; color: var(--muted); }
+/* With 3D on, the product floats over the slot; keep the note low so the product never covers it */
+html.has-3d .hero-slot { justify-content: flex-end; padding-bottom: 4vh; }
 
 /* ---------- Bundle lines in the cart ---------- */
 .bundle-line .dots { display: inline-flex; gap: 2px; }
@@ -347,7 +346,7 @@ html.has-3d .detail-static { display: none; }
   .hero-copy { gap: 12px; }
   .hero .claims { display: none; }
   .hero-slot { min-height: 40svh; }
-  .model-note { bottom: 0; font-size: 11px; }
+  .model-note { font-size: 11px; }
   .hero-slot .sp { --h: 36svh; }
   .beat { grid-template-columns: 1fr; align-content: start; padding-top: calc(76px + var(--demobar-h)); gap: 0; }
   .beat.flip .beat-card { order: 0; }
