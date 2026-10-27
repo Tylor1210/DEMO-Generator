@@ -1,8 +1,10 @@
 # tycodes demo generator
 
-Paste a business website and get back a shoppable 3D scroll demo of its products, built from the brand's own words and checked against its own site. It is the engine behind [tycodes.app](https://tycodes.app) (launching soon).
+Paste a business website and get back a shoppable 3D scroll demo of its products, built from the brand's own words and checked against its own site. It runs at [tycodes.app](https://tycodes.app).
 
-> Status: **Phase 3 of 5.** The pipeline runs on Cloudflare (Worker + Workflow + R2 + D1) behind a public form, and locally from the command line. Preview: https://tycodes-demo.tclont11.workers.dev
+> Status: **Phase 3 of 5.** The pipeline runs on Cloudflare (Worker + Workflow + R2 + D1) behind a public form at https://tycodes.app, and locally from the command line.
+
+**Built with:** TypeScript (pipeline, CLI, Cloudflare Worker), React + Vite (site and demo template), three.js / React Three Fiber (3D), Cloudflare Workers, Workflows, R2 and D1, and the Anthropic API. Node 20+ for local runs.
 
 ## How it works
 
